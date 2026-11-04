@@ -38,6 +38,11 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - `lib/live.ts` complète les matchs **du jour** avec l'API publique d'ESPN (`site.api.espn.com/.../scoreboard`, sans clé, non officielle) : score, minute, buteurs (nom complet + nom court). Cache 20 s. Correspondance des matchs par heure de coup d'envoi (±15 min) + ressemblance des noms (testé : PAE AEK/AEK Athens, Man City, Barça, PSG). Si ESPN ne répond pas → données football-data telles quelles.
 - `components/AutoRefresh.tsx` : `router.refresh()` toutes les 30 s pendant un match (60 s s'il reste des matchs du jour à jouer), en pause pendant « Le match en 30 secondes » et quand l'onglet est caché.
 
+## Classement en direct (/classements)
+- Piège : le classement de football-data compte déjà les matchs en cours, mais avec le score en différé ; le paramètre `matchday` des classements est ignoré en gratuit.
+- Donc `lib/live-table.ts` recalcule tout à partir des matchs de la saison (`/competitions/{code}/matches`, appelé seulement si un match de la compétition est en cours) : « avant » = matchs terminés, « maintenant » = + matchs en cours avec le score ESPN. Différence → flèches ▲/▼. Phases éliminatoires exclues. Testé (79 tests) et vérifié identique à Flashscore le 4/11.
+- Affichage : score en cours à côté de l'équipe, points provisoires en rouge, bandeau, point rouge sur l'onglet du championnat, mise à jour toutes les 30 s.
+
 ## Analyse IA (fiche match)
 - `lib/analysis.ts` : `buildFacts` (chiffres envoyés à l'IA, testés), `parseAnalysis` (vérifie le JSON), `simpleAnalysis` (version sans IA si Gemini est en panne).
 - `lib/ai.ts` : prompt, schéma JSON, modèles essayés dans l'ordre (`gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-flash-latest`), 35 s max par modèle, cache partagé 12 h (clé = les chiffres).

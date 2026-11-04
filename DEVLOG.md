@@ -322,6 +322,24 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — le classement en direct, comme sur Flashscore
+
+**Ce que j'ai demandé** : que le classement bouge pendant les matchs, comme sur Flashscore.
+
+**Le piège découvert** : le classement de football-data.org compte déjà les matchs en cours… mais avec le score en différé (le Real y était compté sur un 0-0 alors qu'il perdait 1-0). Et l'offre gratuite ignore la demande « classement d'avant cette journée ». Impossible donc de simplement « ajouter » le match en cours.
+
+**La solution** : recalculer le classement nous-mêmes à partir de tous les matchs de la saison.
+- « Avant » = les matchs terminés ; « maintenant » = les mêmes + les matchs en cours avec le score en direct.
+- La différence donne les flèches ▲ 2 / ▼ 1 ; les équipes qui jouent affichent leur score (« 1:1 ») et leurs points provisoires en rouge.
+- Bandeau « Classement en direct », point rouge sur l'onglet du championnat, mise à jour toutes les 30 secondes.
+- Ce calcul ne se fait que pendant les matchs (1 appel à l'API de plus) ; sinon, classement officiel.
+
+**Vérification** : comparé à Flashscore au même moment → identique (Liverpool 2e ▲2 1:1 10 pts, Real Madrid 3e ▲2 1:1 10 pts). 5 nouveaux tests (79 au total), dont 2 où **c'étaient mes exemples de test qui étaient faux** (calcul fait de tête), pas le code.
+
+**Au passage** : le quota gratuit de Gemini du jour est épuisé → les nouvelles analyses s'affichent en « Version simplifiée » jusqu'à demain. Le filet de sécurité fonctionne.
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

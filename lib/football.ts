@@ -133,6 +133,14 @@ async function fetchStandings(code: string): Promise<StandingRow[]> {
   return data.standings.find((s) => s.type === "TOTAL")?.table ?? [];
 }
 
+// Tous les matchs d'une compétition cette saison (sert au classement en direct, seulement pendant les matchs).
+async function fetchCompetitionMatches(code: string): Promise<Match[]> {
+  "use cache: remote";
+  cacheLife("minutes");
+  const data = await callApi<{ matches: Match[] }>(`/competitions/${code}/matches`);
+  return data.matches;
+}
+
 // Les 100 meilleurs buteurs d'une compétition (sert au « joueur à surveiller »).
 async function fetchScorers(code: string): Promise<Scorer[]> {
   "use cache: remote";
@@ -199,6 +207,7 @@ export const getHeadToHead = (matchId: number) => safely(() => fetchHeadToHead(m
 export const getStandings = (code: string) => safely(() => fetchStandings(code));
 export const getScorers = (code: string) => safely(() => fetchScorers(code));
 export const getTeams = (code: string) => safely(() => fetchTeams(code));
+export const getCompetitionMatches = (code: string) => safely(() => fetchCompetitionMatches(code));
 
 // Les matchs pas encore commencés de la semaine (pour proposer « le prochain match de ton équipe »).
 export async function getUpcomingMatches(): Promise<Match[]> {

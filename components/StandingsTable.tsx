@@ -1,6 +1,17 @@
 import { ZONES, zoneOf, type CompetitionCode, type ZoneKind } from "@/lib/competitions";
-import type { StandingRow } from "@/lib/types";
+import type { LiveRow } from "@/lib/live-table";
 import TeamCrest from "./TeamCrest";
+
+// ▲ +2 en vert si l'équipe gagne des places pendant les matchs, ▼ 1 en rouge si elle en perd.
+function Movement({ from, to }: { from: number; to: number }) {
+  if (from === to) return null;
+  const up = to < from;
+  return (
+    <span className={`shrink-0 text-xs font-bold ${up ? "text-accent" : "text-live"}`} title={`Avant les matchs : ${from === 1 ? "1er" : `${from}e`}`}>
+      {up ? "▲" : "▼"} {Math.abs(from - to)}
+    </span>
+  );
+}
 
 // « 1er », « 2e », « 18e »
 const ordinal = (n: number) => (n === 1 ? "1er" : `${n}e`);
@@ -13,7 +24,8 @@ const ZONE_COLOR: Record<ZoneKind, string> = {
 };
 
 // Classement complet d'un championnat. Sur téléphone, on cache les colonnes G / N / P pour garder la place.
-export default function StandingsTable({ code, table }: { code: CompetitionCode; table: StandingRow[] }) {
+// Pendant les matchs, les équipes qui jouent affichent leur score en cours, et leurs points sont provisoires (en rouge).
+export default function StandingsTable({ code, table }: { code: CompetitionCode; table: LiveRow[] }) {
   return (
     // Sur grand écran : le tableau à gauche, la légende à droite (elle reste visible en faisant défiler).
     <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-6">
@@ -45,7 +57,23 @@ export default function StandingsTable({ code, table }: { code: CompetitionCode;
                   <td className="max-w-0 py-2.5">
                     <span className="flex items-center gap-2.5">
                       <TeamCrest src={row.team.crest} alt={row.team.name} fallback={row.team.tla} size={22} />
-                      <span className="truncate font-semibold">{row.team.shortName}</span>
+                      {/* Sur téléphone, la flèche et le score passent sous le nom (sinon le nom est coupé) */}
+                      <span className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-2">
+                        <span className="truncate font-semibold">{row.team.shortName}</span>
+                        {(row.liveScore || row.previousPosition !== row.position) && (
+                          <span className="flex items-center gap-1.5">
+                            <Movement from={row.previousPosition} to={row.position} />
+                            {row.liveScore && (
+                              <span
+                                className="shrink-0 rounded-md bg-live/15 px-1.5 py-0.5 font-display text-xs font-bold leading-none text-live"
+                                title="Score du match en cours"
+                              >
+                                {row.liveScore}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </span>
                     </span>
                   </td>
                   <td className="py-2.5 text-center text-muted">{row.playedGames}</td>
@@ -55,7 +83,7 @@ export default function StandingsTable({ code, table }: { code: CompetitionCode;
                   <td className="py-2.5 text-center text-muted">
                     {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
                   </td>
-                  <td className="py-2.5 pr-4 text-right font-display text-lg font-bold">{row.points}</td>
+                  <td className={`py-2.5 pr-4 text-right font-display text-lg font-bold ${row.liveScore ? "text-live" : ""}`}>{row.points}</td>
                 </tr>
               );
             })}
