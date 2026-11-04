@@ -18,7 +18,8 @@ Règles :
 - Si une donnée vaut null, n'en parle pas.
 - Les listes de matchs sont datées et vont du plus récent au plus ancien : respecte cet ordre.
 - Sers-toi de la « zone » du classement pour expliquer l'enjeu (se qualifier, éviter la relégation…).
-- Aucun pronostic : ne dis pas qui va gagner, ne prédis aucun score, ne parle pas de paris.
+- Les « probabilites_estimees » (en %) viennent d'un calcul statistique affiché à côté de ton texte : ton niveau de suspense doit être cohérent avec elles (un favori à plus de 60 % = peu de suspense). Tu peux dire qui part favori, jamais qui va gagner.
+- Aucun pronostic : ne prédis aucun score, ne parle pas de paris.
 - Le lexique explique 2 mots de foot que tu as utilisés et qu'un débutant ne connaît pas (pas « domicile » ni « extérieur »).`;
 
 // La forme exacte de la réponse attendue : Gemini doit renvoyer ce JSON et rien d'autre.
@@ -46,11 +47,23 @@ const RESPONSE_SCHEMA = {
   required: ["enjeu", "resume", "forme_domicile", "forme_exterieur", "face_a_face", "a_surveiller", "suspense", "suspense_raison", "lexique"],
 };
 
+// Analyses en cours de rédaction : si 20 visiteurs ouvrent le même match pendant que l'IA écrit,
+// ils attendent tous cette même réponse au lieu de lancer 20 rédactions.
+const inProgress = new Map<string, Promise<Analysis>>();
+
 // Ce que la page appelle : une analyse IA, ou l'analyse de secours si l'IA ne répond pas.
 export async function getAnalysis(facts: MatchFacts): Promise<Analysis> {
   if (!process.env.GEMINI_API_KEY) return simpleAnalysis(facts);
+
+  const key = JSON.stringify(facts);
+  let pending = inProgress.get(key);
+  if (!pending) {
+    pending = generateAnalysis(facts).finally(() => inProgress.delete(key));
+    inProgress.set(key, pending);
+  }
+
   try {
-    return await generateAnalysis(facts);
+    return await pending;
   } catch (error) {
     console.error(error);
     return simpleAnalysis(facts);

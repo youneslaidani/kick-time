@@ -1,7 +1,8 @@
 import { competitionLabel, isCompetitionCode, zoneOf } from "./competitions";
 import { formatShortDate } from "./dates";
-import { count } from "./text";
+import type { WinProbabilities } from "./probabilities";
 import { formPoints, headToHead, recentForm, venueRecord, type FormEntry } from "./stats";
+import { count } from "./text";
 import type { Match, StandingRow } from "./types";
 
 // Ce fichier prépare l'analyse d'avant-match :
@@ -35,6 +36,8 @@ export type MatchFacts = {
   domicile: TeamFacts;
   exterieur: TeamFacts;
   face_a_face: { nombre: number; bilan: string; les_plus_recents: string[] } | null;
+  // Pourcentages calculés par le code (modèle de Poisson), les mêmes que la barre « Qui part favori ? »
+  probabilites_estimees: { victoire_domicile: number; nul: number; victoire_exterieur: number } | null;
 };
 
 type Sources = {
@@ -42,9 +45,13 @@ type Sources = {
   awaySeason: Match[] | null;
   meetings: Match[] | null;
   table: StandingRow[] | null;
+  probabilities?: WinProbabilities | null;
 };
 
-export function buildFacts(match: Match, { homeSeason, awaySeason, meetings, table: currentTable }: Sources): MatchFacts {
+export function buildFacts(
+  match: Match,
+  { homeSeason, awaySeason, meetings, table: currentTable, probabilities = null }: Sources,
+): MatchFacts {
   const home = match.homeTeam;
   const away = match.awayTeam;
   // Seulement ce qui s'est passé AVANT le match : l'analyse reste une analyse d'avant-match.
@@ -97,6 +104,11 @@ export function buildFacts(match: Match, { homeSeason, awaySeason, meetings, tab
       les_plus_recents: h2h.recent.map(
         (m) => `${formatShortDate(m.utcDate)} : ${m.homeTeam.shortName} ${m.score.fullTime.home}-${m.score.fullTime.away} ${m.awayTeam.shortName}`,
       ),
+    },
+    probabilites_estimees: probabilities && {
+      victoire_domicile: probabilities.home,
+      nul: probabilities.draw,
+      victoire_exterieur: probabilities.away,
     },
   };
 }
@@ -184,10 +196,18 @@ export function simpleAnalysis(facts: MatchFacts): Analysis {
     else enjeu = `${first.nom} (${rank(first.classement!.position)}) compte ${gap} points d'avance sur ${second.nom} (${rank(second.classement!.position)}).`;
   }
 
-  // Le suspense : plus les équipes sont proches (classement et forme), plus le match est indécis
-  const formGap = Math.abs((home.points_sur_les_5_derniers ?? 7) - (away.points_sur_les_5_derniers ?? 7)); // de 0 à 15
-  const tableGap = hc && ac ? Math.abs(hc.position - ac.position) / (facts.nombre_equipes_au_classement ?? 20) : 0.25; // de 0 à 1
-  const suspense = Math.min(5, Math.max(1, 5 - Math.round(formGap / 5 + tableGap * 4)));
+  // Le suspense : d'après les probabilités si on les a (plus le favori est net, moins il y a de suspense),
+  // sinon d'après l'écart au classement et en forme.
+  const odds = facts.probabilites_estimees;
+  let suspense: number;
+  if (odds) {
+    const favourite = Math.max(odds.victoire_domicile, odds.victoire_exterieur);
+    suspense = favourite >= 70 ? 1 : favourite >= 58 ? 2 : favourite >= 48 ? 3 : favourite >= 40 ? 4 : 5;
+  } else {
+    const formGap = Math.abs((home.points_sur_les_5_derniers ?? 7) - (away.points_sur_les_5_derniers ?? 7)); // de 0 à 15
+    const tableGap = hc && ac ? Math.abs(hc.position - ac.position) / (facts.nombre_equipes_au_classement ?? 20) : 0.25; // de 0 à 1
+    suspense = Math.min(5, Math.max(1, 5 - Math.round(formGap / 5 + tableGap * 4)));
+  }
 
   const watch: string[] = [];
   if (hc && ac) {

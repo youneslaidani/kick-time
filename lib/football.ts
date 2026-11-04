@@ -31,7 +31,20 @@ async function waitForSlot(): Promise<void> {
   }
 }
 
-async function callApi<T>(path: string, retry = true): Promise<T> {
+// Si plusieurs visiteurs demandent la même donnée au même moment (avant qu'elle soit en cache),
+// on n'envoie qu'UN appel et tout le monde partage la réponse : 20 téléphones = 1 appel, pas 20.
+const inFlight = new Map<string, Promise<unknown>>();
+
+function callApi<T>(path: string): Promise<T> {
+  const pending = inFlight.get(path);
+  if (pending) return pending as Promise<T>;
+
+  const request = sendRequest<T>(path).finally(() => inFlight.delete(path));
+  inFlight.set(path, request);
+  return request;
+}
+
+async function sendRequest<T>(path: string, retry = true): Promise<T> {
   await waitForSlot();
   const response = await fetch(`${API_URL}${path}`, {
     headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_TOKEN ?? "" },
@@ -44,7 +57,7 @@ async function callApi<T>(path: string, retry = true): Promise<T> {
   if (response.status === 429 && retry) {
     const seconds = Math.min(Number(response.headers.get("X-RequestCounter-Reset")) || 60, 60);
     await new Promise((resolve) => setTimeout(resolve, (seconds + 1) * 1000));
-    return callApi<T>(path, false);
+    return sendRequest<T>(path, false);
   }
 
   if (!response.ok) {

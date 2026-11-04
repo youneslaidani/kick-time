@@ -99,4 +99,11 @@ describe("simpleAnalysis (analyse de secours sans IA)", () => {
     expect(analysis.suspense).toBeGreaterThanOrEqual(1);
     expect(analysis.suspense).toBeLessThanOrEqual(5);
   });
+
+  it("met peu de suspense quand les probabilités désignent un net favori", () => {
+    const probabilities = { home: 12, draw: 17, away: 71, expectedHome: 0.7, expectedAway: 2.4, played: { home: 11, away: 11 } };
+    const facts = buildFacts(upcoming, { homeSeason: null, awaySeason: null, meetings: null, table: null, probabilities });
+    expect(facts.probabilites_estimees).toEqual({ victoire_domicile: 12, nul: 17, victoire_exterieur: 71 });
+    expect(simpleAnalysis(facts).suspense).toBe(1);
+  });
 });

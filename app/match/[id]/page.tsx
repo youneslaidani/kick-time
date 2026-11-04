@@ -7,9 +7,11 @@ import HeadToHeadCard from "@/components/HeadToHeadCard";
 import MatchHeader from "@/components/MatchHeader";
 import Section, { Unavailable } from "@/components/Section";
 import StandingsCompare from "@/components/StandingsCompare";
+import WinProbabilityBar from "@/components/WinProbabilityBar";
 import { getAnalysis } from "@/lib/ai";
 import { buildFacts } from "@/lib/analysis";
 import { getHeadToHead, getMatch, getStandings, getTeamSeason } from "@/lib/football";
+import { probabilitiesFor } from "@/lib/probabilities";
 import { headToHead, recentForm, venueRecord } from "@/lib/stats";
 import type { Match, StandingRow } from "@/lib/types";
 
@@ -48,6 +50,10 @@ async function MatchView({ params }: { params: Params }) {
   return (
     <div className="flex flex-col gap-4">
       <MatchHeader match={match} />
+
+      <Suspense fallback={<div className="h-36 animate-pulse rounded-3xl bg-surface" />}>
+        <ProbabilityBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
+      </Suspense>
 
       <Suspense fallback={<AnalysisSkeleton />}>
         <AnalysisBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} pastMeetings={pastMeetings} table={table} />
@@ -116,6 +122,14 @@ async function StandingsBlock({
   );
 }
 
+// Probabilités calculées par le code (modèle de Poisson) : rien ne s'affiche si une équipe a trop peu joué.
+async function ProbabilityBlock({ match, homeSeason, awaySeason }: { match: Match; homeSeason: Loading<Match[]>; awaySeason: Loading<Match[]> }) {
+  const [home, away] = await Promise.all([homeSeason, awaySeason]);
+  const probabilities = probabilitiesFor(match, home, away);
+  if (!probabilities) return null;
+  return <WinProbabilityBar probabilities={probabilities} home={match.homeTeam} away={match.awayTeam} />;
+}
+
 // L'analyse IA attend les mêmes données que les blocs du dessous, puis les fait expliquer par Gemini.
 async function AnalysisBlock({
   match,
@@ -134,7 +148,8 @@ async function AnalysisBlock({
   // Sans aucun chiffre (mode démo, API en panne), l'IA n'aurait rien de vrai à raconter : on n'affiche rien.
   if (!home && !away && !rows) return null;
 
-  const facts = buildFacts(match, { homeSeason: home, awaySeason: away, meetings, table: rows });
+  const probabilities = probabilitiesFor(match, home, away);
+  const facts = buildFacts(match, { homeSeason: home, awaySeason: away, meetings, table: rows, probabilities });
   const analysis = await getAnalysis(facts);
   const played = match.status !== "SCHEDULED" && match.status !== "TIMED";
   return <AnalysisCard analysis={analysis} home={match.homeTeam} away={match.awayTeam} played={played} />;

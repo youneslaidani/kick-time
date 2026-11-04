@@ -17,7 +17,7 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Les clés API ne sortent jamais du serveur : jamais de `NEXT_PUBLIC_` pour une clé.
 - Toute donnée externe passe par `lib/football.ts` ; si l'API échoue ou si `DEMO_MODE=true`, on bascule sur `data/demo/`.
 - Les chiffres (forme, face-à-face, écarts) sont **calculés par le code** dans `lib/stats.ts`. L'IA ne fait que les expliquer.
-- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements).
+- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements), sauf ajout demandé par l'élève (ex. : barre de probabilités, 4/11).
 
 ## Ce que donne l'API football-data.org gratuite (testé le 4/11/2026)
 - `/matches?competitions=…&dateFrom=…&dateTo=…` : `dateTo` est **exclu**. Pas de champ `minute`.
@@ -39,13 +39,19 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Générée dans un composant serveur sous `Suspense` (pas de route API) : la clé reste côté serveur, le squelette « L'IA analyse le match… » s'affiche pendant la rédaction.
 - Le classement n'est donné à l'IA qu'avant le coup d'envoi (après, il contient déjà le résultat).
 - Gemini gratuit est lent aux heures chargées (15-25 s, 503 fréquents l'après-midi) → **préchauffer** les analyses de la démo.
+- **Quota gratuit : 20 requêtes par jour et par modèle** pour `gemini-3.6-flash` (remise à zéro vers 9 h, heure de Paris). Les autres modèles de la liste ont leur propre quota. Voir https://aistudio.google.com/rate-limit. Ne pas « brûler » le quota en tests le jour de l'oral, et ne plus modifier `buildFacts` ensuite (ça change la clé du cache → tout est réécrit).
+- Demandes identiques simultanées regroupées (`inFlight` dans `lib/football.ts`, `inProgress` dans `lib/ai.ts`) : 20 visiteurs sur une fiche pas encore en cache = 1 appel.
+
+## Probabilités « Qui part favori ? »
+- `lib/probabilities.ts` : modèle de Poisson calculé par le code (buts marqués/encaissés par match cette saison, bonus domicile ×1,15, prudence = 4 matchs « moyens » ajoutés, rien sous 3 matchs joués). Testé dans `probabilities.test.ts`.
+- Présenté comme une **estimation statistique**, pas un pronostic de pari. Les pourcentages sont aussi donnés à l'IA pour que sa jauge de suspense soit cohérente ; elle peut dire qui part favori, jamais qui va gagner.
 
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).
 - Fournir des matchs **datés, dans un ordre annoncé** (« du plus récent au plus ancien ») : sans ça, l'IA a inversé la forme d'une équipe.
 - N'utiliser que les données fournies ; aucun nom de joueur.
-- Aucun pronostic de pari, aucun score exact prédit.
+- Aucun pronostic de pari, aucun score exact prédit ; l'IA peut dire qui part favori d'après les probabilités calculées, jamais qui va gagner.
 - Réponse en JSON validé ; si invalide → analyse de secours.
 
 ## Design (sombre et sportif)

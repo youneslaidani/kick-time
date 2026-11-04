@@ -33,6 +33,7 @@ export type FormEntry = {
 export function recentForm(matches: Match[], teamId: number, before: string, count = 5): FormEntry[] {
   const entries: FormEntry[] = [];
   for (const match of finishedBefore(matches, before)) {
+    if (match.homeTeam.id !== teamId && match.awayTeam.id !== teamId) continue; // match d'autres équipes
     const result = resultFor(match, teamId);
     if (!result) continue;
     const atHome = match.homeTeam.id === teamId;

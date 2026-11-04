@@ -48,6 +48,11 @@ describe("recentForm", () => {
     expect(recentForm(season, TOULOUSE.id, "2026-12-01", 2).map((e) => e.result)).toEqual(["V", "D"]);
   });
 
+  it("ignore les matchs où l'équipe ne joue pas", () => {
+    const others = [...season, match("2026-10-05", NANTES, STRASBOURG, 4, 0)];
+    expect(recentForm(others, TOULOUSE.id, "2026-12-01")).toHaveLength(3);
+  });
+
   it("note l'adversaire, le lieu et le score", () => {
     const [last] = recentForm(season, TOULOUSE.id, "2026-12-01", 1);
     expect(last).toMatchObject({ opponent: NANTES, atHome: false, goalsFor: 0, goalsAgainst: 3 });

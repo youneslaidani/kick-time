@@ -128,6 +128,31 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — ma nouvelle idée : « Qui part favori ? »
+
+**Ce que j'ai demandé**
+- Une barre avec le pourcentage de chances de victoire de chaque équipe, juste avant l'analyse.
+
+**Ce qu'on a décidé ensemble**
+- Les probabilités sont **calculées par le code, pas par l'IA** : on garde la règle du projet (le code calcule, l'IA explique).
+- Méthode : le **modèle de Poisson**, classique chez les statisticiens du foot. Attaque de l'un face à la défense de l'autre → buts « attendus » → probabilité de chaque score → victoire / nul / défaite.
+- Présenté comme une **estimation statistique, pas un pronostic de pari**, avec un bouton « Comment c'est calculé ? ».
+- Les pourcentages sont aussi donnés à l'IA, pour que sa jauge de suspense ne contredise pas la barre.
+
+**Résultat** : Valence 13 % · nul 18 % · Real Madrid 69 % (buts attendus 0,9 contre 2,3) ; l'IA écrit « Plutôt à sens unique ».
+
+**Problèmes rencontrés et solutions**
+- **Un test a trouvé un vrai défaut** dans un calcul existant : la forme comptait aussi les matchs où l'équipe ne jouait pas. Invisible dans l'app (la liste d'une équipe ne contient que ses matchs), mais fragile → corrigé + test.
+- **20 visiteurs sur une fiche pas encore en cache = 20 fois les mêmes appels** (une page a mis 3,5 minutes en test) → les demandes identiques en cours sont maintenant partagées. Test : 3 visiteurs simultanés = 1 seule rédaction par l'IA, 17 s pour tous.
+- **Découverte importante : Gemini gratuit = 20 analyses par jour** pour le modèle principal, et nos tests les ont toutes utilisées. Le modèle de secours a pris le relais automatiquement. Pour l'oral : analyses générées à l'avance, pas de tests le jour J.
+
+**Tests automatiques** : 31 (contre 22 avant).
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date
