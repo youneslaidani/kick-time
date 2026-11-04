@@ -6,12 +6,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
-// « Mon équipe » n'apparaît dans le menu que sur grand écran (pas la place sur téléphone :
-// l'accueil affiche déjà une grande accroche vers le quiz).
+// « Mon équipe » et « Le foot expliqué » n'apparaissent dans le menu que sur grand écran (pas la place sur téléphone :
+// l'accueil affiche déjà deux grands boutons vers ces pages).
 const LINKS = [
   { href: "/", label: "Matchs", wideOnly: false },
   { href: "/classements", label: "Classements", wideOnly: false },
   { href: "/mon-equipe", label: "Mon équipe", wideOnly: true },
+  { href: "/comprendre-le-foot", label: "Le foot expliqué", wideOnly: true },
 ];
 
 // L'adresse de la page n'est connue qu'au moment de la visite : on affiche d'abord les liens

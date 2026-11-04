@@ -248,6 +248,23 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — « Tu comprends rien au foot ? 🤢 »
+
+**Ce que j'ai demandé**
+- Une rubrique drôle, avec un gros bouton et un emoji dégoûté, pour que quelqu'un qui n'aime pas le foot comprenne les bases et puisse participer à une discussion. Sans être sexiste : beaucoup de gens, hommes comme femmes, ne comprennent pas certaines règles.
+
+**Ce que l'IA a construit**
+- Un gros bouton **🤢 « Tu comprends rien au foot ? »** (l'emoji se tortille) en haut de l'accueil.
+- Une page « Le foot expliqué en 5 minutes » : les bases en 30 secondes, **le hors-jeu avec un schéma animé interactif** (on bascule entre « hors-jeu » et « pas hors-jeu »), cartons/coup franc/penalty, le VAR, la Ligue des champions expliquée en 3 étapes, les autres compétitions (dont la Coupe du monde féminine et le Ballon d'Or féminin), un dico de survie, des **phrases magiques pour briller en discussion**, et un **Vrai ou faux** avec score.
+- Règle d'humour : on rit **du foot** (le VAR interminable, les joueurs qui se roulent par terre, les phrases toutes faites des entraîneurs), jamais d'un public.
+- Aucun appel à l'API ni à l'IA : la page est instantanée, même avec un mauvais wifi.
+
+**Vérifications** : schéma du hors-jeu (étiquettes qui se chevauchaient → corrigé), Vrai ou faux jusqu'au score, PC / tablette / téléphone sans débordement.
+
+**Tests automatiques** : 59.
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

@@ -25,25 +25,44 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export default function HomePage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 lg:px-8">
-      {/* L'accroche pour ceux qui ne suivent pas le foot : c'est la première chose qu'ils voient */}
-      <Link
-        href="/mon-equipe"
-        prefetch={false}
-        className="mb-6 flex items-center gap-4 rounded-3xl border border-accent/40 bg-linear-to-r from-accent/15 to-surface px-5 py-4 transition-colors hover:border-accent"
-      >
-        <span className="text-3xl" aria-hidden="true">
-          ✨
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-xs font-bold uppercase tracking-widest text-accent">Pas fan de foot ?</span>
-          <span className="block font-display text-xl font-extrabold uppercase leading-tight sm:text-2xl">
-            Trouve ton équipe en 20 secondes
+      {/* Les deux portes d'entrée pour ceux qui ne suivent pas le foot : c'est la première chose qu'ils voient */}
+      <div className="mb-6 grid gap-3 lg:grid-cols-2">
+        <Link
+          href="/comprendre-le-foot"
+          className="group flex items-center gap-4 rounded-3xl border border-warn/50 bg-linear-to-r from-warn/15 to-surface px-5 py-5 transition-colors hover:border-warn"
+        >
+          {/* l'emoji dégoûté qui se tortille : impossible de ne pas cliquer */}
+          <span className="inline-block animate-wobble text-5xl" aria-hidden="true">
+            🤢
           </span>
-        </span>
-        <span className="text-2xl text-accent" aria-hidden="true">
-          →
-        </span>
-      </Link>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-bold uppercase tracking-widest text-warn">Pas de panique</span>
+            <span className="block font-display text-2xl font-extrabold uppercase leading-tight">Tu comprends rien au foot ?</span>
+            <span className="mt-0.5 block text-sm text-muted">Le foot expliqué en 5 minutes, sans prise de tête</span>
+          </span>
+          <span className="text-2xl text-warn transition-transform group-hover:translate-x-1" aria-hidden="true">
+            →
+          </span>
+        </Link>
+
+        <Link
+          href="/mon-equipe"
+          prefetch={false}
+          className="group flex items-center gap-4 rounded-3xl border border-accent/40 bg-linear-to-r from-accent/15 to-surface px-5 py-5 transition-colors hover:border-accent"
+        >
+          <span className="text-5xl" aria-hidden="true">
+            ✨
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-bold uppercase tracking-widest text-accent">Pas fan de foot ?</span>
+            <span className="block font-display text-2xl font-extrabold uppercase leading-tight">Trouve ton équipe en 20 secondes</span>
+            <span className="mt-0.5 block text-sm text-muted">5 questions, et tu as un club à supporter</span>
+          </span>
+          <span className="text-2xl text-accent transition-transform group-hover:translate-x-1" aria-hidden="true">
+            →
+          </span>
+        </Link>
+      </div>
 
       {/* Suspense : le squelette s'affiche tout de suite, les matchs arrivent dès qu'ils sont chargés. */}
       <Suspense fallback={<MatchListSkeleton />}>

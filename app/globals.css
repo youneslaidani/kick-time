@@ -26,6 +26,22 @@
   --animate-story-progress: story-progress linear both;
   --animate-story-glow: story-glow 14s ease-in-out infinite;
   --animate-confetti: confetti linear both;
+  --animate-wobble: wobble 2.4s ease-in-out infinite;
+  --animate-ball-pass: ball-pass 2.8s ease-in-out infinite;
+
+  /* l'emoji 🤢 qui se tortille sur le bouton « Tu comprends rien au foot ? » */
+  @keyframes wobble {
+    0%, 55%, 100% { transform: rotate(0deg) scale(1); }
+    10% { transform: rotate(-12deg) scale(1.1); }
+    20% { transform: rotate(10deg) scale(1.1); }
+    30% { transform: rotate(-8deg) scale(1.05); }
+    40% { transform: rotate(5deg) scale(1); }
+  }
+  /* le ballon qui part du passeur vers l'attaquant (schéma du hors-jeu) */
+  @keyframes ball-pass {
+    0%, 25% { transform: translate(0, 0); }
+    65%, 100% { transform: translate(var(--tx), var(--ty)); }
+  }
 
   @keyframes confetti {
     from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
@@ -61,7 +77,9 @@
 
 /* Si l'utilisateur a demandé moins d'animations à son système, on les coupe. */
 @media (prefers-reduced-motion: reduce) {
-  [class*="animate-story"] {
+  [class*="animate-story"],
+  [class*="animate-wobble"],
+  [class*="animate-ball-pass"] {
     animation: none !important;
   }
 }

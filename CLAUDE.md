@@ -64,6 +64,12 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Données : `/competitions/{code}/teams` (couleurs, stade, création — cache 1 jour) + classements des 5 grands championnats + matchs de la semaine pour « son prochain match ». 11 appels à froid (~1 min) → à **préchauffer** avant l'oral.
 - Accroche en haut de l'accueil ; lien « Mon équipe » dans le menu sur grand écran seulement.
 
+## « Tu comprends rien au foot ? » (/comprendre-le-foot)
+- Page 100 % statique (aucun appel API ni IA) : les bases, le hors-jeu (schéma interactif `OffsideDemo`), cartons/penalty, VAR, compétitions (Ligue des champions, Coupe du monde féminine 2027, Ballon d'Or féminin), dico de survie, phrases magiques, Vrai ou faux (`TrueOrFalse`).
+- Contenu et petit quiz dans `lib/basics.ts` (testé).
+- Ton : drôle mais jamais aux dépens d'un public ; on rit du foot lui-même (VAR interminable, simulations, phrases d'entraîneurs).
+- Gros bouton 🤢 qui se tortille en haut de l'accueil, à côté de « Trouve ton équipe ».
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).
