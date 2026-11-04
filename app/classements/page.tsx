@@ -10,7 +10,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 // Page /classements?ligue=PL — Ligue 1 par défaut.
 export default function StandingsPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 lg:px-8">
       <section className="mb-5">
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">Classements</p>
         <h1 className="font-display text-4xl font-extrabold uppercase leading-tight sm:text-5xl">Qui est en tête ?</h1>

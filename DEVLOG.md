@@ -224,6 +224,20 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — l'écran de PC n'était pas utilisé en entier
+
+**Ce que j'ai remarqué** : sur PC, la fiche match tenait dans une colonne étroite au milieu, avec de grandes bandes vides sur les côtés.
+
+**Pourquoi** : l'app avait été conçue « téléphone d'abord », avec une largeur maximale d'environ 770 px partout.
+
+**Ce qu'on a changé** (seulement sur grand écran, le téléphone ne bouge pas) :
+- Largeur maximale portée à ~1150 px.
+- Fiche match en **2 colonnes** : à gauche probabilités + analyse IA, à droite joueur, forme, face-à-face, classement.
+- Accueil : les championnats répartis sur 2 colonnes. Classements : la légende à droite du tableau.
+- Vérifié en 1440 px (PC), 1280 px (vidéoprojecteur) et 375 px (téléphone).
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

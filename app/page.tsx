@@ -24,7 +24,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default function HomePage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 lg:px-8">
       {/* L'accroche pour ceux qui ne suivent pas le foot : c'est la première chose qu'ils voient */}
       <Link
         href="/mon-equipe"
@@ -109,9 +109,10 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
       {visible.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="flex flex-col gap-8">
+        // Sur grand écran, les championnats se répartissent sur 2 colonnes (comme les colonnes d'un journal).
+        <div className="flex flex-col gap-8 lg:block lg:columns-2 lg:gap-8">
           {visible.map((group) => (
-            <section key={group.code}>
+            <section key={group.code} className="break-inside-avoid lg:mb-8">
               <h2 className="mb-3 flex items-center gap-2.5">
                 <TeamCrest src={group.emblem} alt="" fallback={group.code} size={24} />
                 <span className="font-display text-xl font-bold uppercase tracking-wide">

@@ -28,7 +28,7 @@ type Loading<T> = Promise<T | null>; // une donnée en cours de chargement (null
 // Fiche match : /match/575393
 export default function MatchPage({ params }: { params: Params }) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-4">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-4 lg:px-8">
       <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-text">
         <span aria-hidden="true">←</span> Tous les matchs
       </Link>
@@ -65,35 +65,43 @@ async function MatchView({ params }: { params: Params }) {
         <StoryBlock match={match} analysis={analysis} featured={featured} homeSeason={homeSeason} awaySeason={awaySeason} />
       </Suspense>
 
-      <Suspense fallback={<div className="h-36 animate-pulse rounded-3xl bg-surface" />}>
-        <ProbabilityBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
-      </Suspense>
+      {/* Sur grand écran (ordinateur, vidéoprojecteur) : 2 colonnes pour utiliser toute la largeur.
+          Sur téléphone : une seule colonne, dans le même ordre. */}
+      <div className="grid items-start gap-4 lg:grid-cols-5 lg:gap-6">
+        <div className="flex flex-col gap-4 lg:col-span-3 lg:gap-6">
+          <Suspense fallback={<div className="h-36 animate-pulse rounded-3xl bg-surface" />}>
+            <ProbabilityBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
+          </Suspense>
 
-      <Suspense fallback={<AnalysisSkeleton />}>
-        <AnalysisBlock match={match} analysis={analysis} />
-      </Suspense>
+          <Suspense fallback={<AnalysisSkeleton />}>
+            <AnalysisBlock match={match} analysis={analysis} />
+          </Suspense>
+        </div>
 
-      <Suspense fallback={<div className="h-56 animate-pulse rounded-3xl bg-surface" />}>
-        <PlayerBlock match={match} featured={featured} />
-      </Suspense>
+        <div className="flex flex-col gap-4 lg:col-span-2 lg:gap-6">
+          <Suspense fallback={<div className="h-56 animate-pulse rounded-3xl bg-surface" />}>
+            <PlayerBlock match={match} featured={featured} />
+          </Suspense>
 
-      <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
-        <Suspense fallback={<BlockSkeleton />}>
-          <FormBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
-        </Suspense>
-      </Section>
+          <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
+            <Suspense fallback={<BlockSkeleton />}>
+              <FormBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
+            </Suspense>
+          </Section>
 
-      <Section title="Face-à-face" hint="Ligue des champions et grands championnats, depuis 2020">
-        <Suspense fallback={<BlockSkeleton />}>
-          <HeadToHeadBlock match={match} pastMeetings={pastMeetings} />
-        </Suspense>
-      </Section>
+          <Section title="Face-à-face" hint="Ligue des champions et grands championnats, depuis 2020">
+            <Suspense fallback={<BlockSkeleton />}>
+              <HeadToHeadBlock match={match} pastMeetings={pastMeetings} />
+            </Suspense>
+          </Section>
 
-      <Section title="Au classement" hint="Pts = points : victoire 3, nul 1, défaite 0">
-        <Suspense fallback={<BlockSkeleton />}>
-          <StandingsBlock match={match} table={table} homeSeason={homeSeason} awaySeason={awaySeason} />
-        </Suspense>
-      </Section>
+          <Section title="Au classement" hint="Pts = points : victoire 3, nul 1, défaite 0">
+            <Suspense fallback={<BlockSkeleton />}>
+              <StandingsBlock match={match} table={table} homeSeason={homeSeason} awaySeason={awaySeason} />
+            </Suspense>
+          </Section>
+        </div>
+      </div>
     </div>
   );
 }

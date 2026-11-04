@@ -63,7 +63,8 @@ export default function StandingsCompare({ table, home, away, homeRecord, awayRe
         )}
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      {/* côte à côte sur tablette ; l'un sous l'autre dans la colonne de droite sur ordinateur */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         <VenueLine team={home} venue="à domicile" record={homeRecord} />
         <VenueLine team={away} venue="à l'extérieur" record={awayRecord} />
       </div>

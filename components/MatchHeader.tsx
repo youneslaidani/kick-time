@@ -28,7 +28,7 @@ export default function MatchHeader({ match }: { match: Match }) {
 
         <div className="flex min-w-24 flex-col items-center gap-2 pt-3">
           {showScore ? (
-            <span className="font-display text-5xl font-extrabold tabular-nums leading-none sm:text-6xl">
+            <span className="font-display text-5xl font-extrabold tabular-nums leading-none sm:text-6xl lg:text-7xl">
               {home ?? 0}
               <span className="mx-2 text-muted">-</span>
               {away ?? 0}
@@ -56,8 +56,8 @@ export default function MatchHeader({ match }: { match: Match }) {
 function TeamBlock({ team, venue }: { team: Team; venue: string }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-      <TeamCrest src={team.crest} alt={team.name} fallback={team.tla} size={64} />
-      <p className="w-full font-display text-xl font-bold uppercase leading-tight sm:text-2xl">{team.shortName}</p>
+      <TeamCrest src={team.crest} alt={team.name} fallback={team.tla} size={80} />
+      <p className="w-full font-display text-xl font-bold uppercase leading-tight sm:text-2xl lg:text-3xl">{team.shortName}</p>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{venue}</p>
     </div>
   );

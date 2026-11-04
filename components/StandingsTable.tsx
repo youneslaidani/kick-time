@@ -15,7 +15,8 @@ const ZONE_COLOR: Record<ZoneKind, string> = {
 // Classement complet d'un championnat. Sur téléphone, on cache les colonnes G / N / P pour garder la place.
 export default function StandingsTable({ code, table }: { code: CompetitionCode; table: StandingRow[] }) {
   return (
-    <>
+    // Sur grand écran : le tableau à gauche, la légende à droite (elle reste visible en faisant défiler).
+    <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-6">
       <div className="overflow-hidden rounded-3xl border border-line bg-surface">
         <table className="w-full text-sm">
           <thead className="bg-surface-2/60 text-xs text-muted">
@@ -63,7 +64,7 @@ export default function StandingsTable({ code, table }: { code: CompetitionCode;
       </div>
 
       {/* Légende pour les débutants : ce que signifient les couleurs et les abréviations */}
-      <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-line p-5 text-sm">
+      <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-line p-5 text-sm lg:sticky lg:top-24 lg:mt-0">
         <ul className="flex flex-col gap-2">
           {ZONES[code].map((zone) => (
             <li key={zone.label} className="flex items-center gap-3">
@@ -82,6 +83,6 @@ export default function StandingsTable({ code, table }: { code: CompetitionCode;
           (victoire 3, nul 1, défaite 0). À égalité de points, la différence de buts départage les équipes.
         </p>
       </div>
-    </>
+    </div>
   );
 }
