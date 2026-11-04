@@ -22,9 +22,10 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 ## Ce que donne l'API football-data.org gratuite (testé le 4/11/2026)
 - `/matches?competitions=…&dateFrom=…&dateTo=…` : `dateTo` est **exclu**. Pas de champ `minute`.
 - `/competitions/{code}/standings` : seulement le classement `TOTAL`, `form` vaut `null` → la forme se calcule nous-mêmes.
-- `/matches/{id}/head2head` : historique sur plusieurs saisons (depuis 2020), mais `aggregates` est faux (victoires à 0) → recompter à partir de `matches`. Liste vide si les équipes ne se sont jamais affrontées dans les compétitions couvertes.
-- `/teams/{id}/matches?status=FINISHED` : uniquement les compétitions couvertes, ordre chronologique.
-- Limite stricte de 10 appels/minute (erreur 429 au-delà) → toujours passer par le cache.
+- `/matches/{id}/head2head` : historique depuis 2020 environ, **seulement dans les 12 compétitions gratuites** (pas de Ligue Europa, Conférence ni coupes : Man United–Roma apparaît vide). `limit` vaut 15 par défaut → on demande `limit=50`. Filtre `dateFrom` interdit (403). `aggregates` est faux (victoires à 0) → recompter à partir de `matches`.
+- `/teams/{id}/matches?status=FINISHED` : saison en cours, uniquement les compétitions couvertes. Le paramètre `season` pour 2020 et avant renvoie 403.
+- Limite stricte de 10 appels/minute (erreur 429 au-delà). L'en-tête `X-RequestCounter-Reset` donne le nombre de secondes avant la remise à zéro (fiable, testé). Défenses dans `lib/football.ts` : cache partagé, file d'attente (10 appels sur une minute glissante), puis une nouvelle tentative après le délai indiqué.
+- Une fiche match jamais ouverte coûte 4 appels (2 équipes, face-à-face, classement) → environ 2 nouvelles fiches par minute ; au-delà, les blocs attendent. Avant l'oral : **préchauffer** les fiches de la démo.
 
 ## Ce que donne Gemini gratuit (testé le 4/11/2026)
 - Clé au nouveau format `AQ.…` (53 caractères), envoyée dans l'en-tête `x-goog-api-key` (jamais dans l'URL).

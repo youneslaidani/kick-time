@@ -8,8 +8,10 @@ import Section, { Unavailable } from "@/components/Section";
 import StandingsCompare from "@/components/StandingsCompare";
 import { getHeadToHead, getMatch, getStandings, getTeamSeason } from "@/lib/football";
 import { headToHead, recentForm, venueRecord } from "@/lib/stats";
+import type { Match, StandingRow } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
+type Loading<T> = Promise<T | null>; // une donnée en cours de chargement (null = indisponible)
 
 // Fiche match : /match/575393
 export default function MatchPage({ params }: { params: Params }) {
@@ -32,18 +34,13 @@ async function MatchView({ params }: { params: Params }) {
   const match = await getMatch(id);
   if (!match) notFound();
 
-  // Les 4 chargements partent en même temps (Promise.all) : la page s'affiche plus vite.
-  const [homeSeason, awaySeason, pastMeetings, table] = await Promise.all([
-    getTeamSeason(match.homeTeam.id),
-    getTeamSeason(match.awayTeam.id),
-    getHeadToHead(match.id),
-    getStandings(match.competition.code),
-  ]);
-
-  // On ne regarde que ce qui s'est passé AVANT ce match, même s'il est déjà joué.
-  const before = match.utcDate;
-  const homeForm = homeSeason && recentForm(homeSeason, match.homeTeam.id, before);
-  const awayForm = awaySeason && recentForm(awaySeason, match.awayTeam.id, before);
+  // On lance les 4 chargements tout de suite, SANS les attendre ici :
+  // chaque bloc s'affiche dès que ses propres données arrivent (s'il faut patienter
+  // à cause de la limite d'appels, seul ce bloc reste en chargement).
+  const homeSeason = getTeamSeason(match.homeTeam.id);
+  const awaySeason = getTeamSeason(match.awayTeam.id);
+  const pastMeetings = getHeadToHead(match.id);
+  const table = getStandings(match.competition.code);
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,35 +49,65 @@ async function MatchView({ params }: { params: Params }) {
       <AnalysisTeaser />
 
       <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
-        {homeForm && awayForm ? (
-          <div className="flex flex-col gap-5">
-            <FormRow team={match.homeTeam} entries={homeForm} />
-            <FormRow team={match.awayTeam} entries={awayForm} />
-            <p className="text-xs text-muted">V = victoire · N = match nul · D = défaite. Sous chaque pastille : l&apos;adversaire.</p>
-          </div>
-        ) : (
-          <Unavailable />
-        )}
+        <Suspense fallback={<BlockSkeleton />}>
+          <FormBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
+        </Suspense>
       </Section>
 
-      <Section title="Face-à-face" hint="Toutes les confrontations connues">
-        <HeadToHeadCard
-          h2h={pastMeetings && headToHead(pastMeetings, match)}
-          home={match.homeTeam}
-          away={match.awayTeam}
-        />
+      <Section title="Face-à-face" hint="Ligue des champions et grands championnats, depuis 2020">
+        <Suspense fallback={<BlockSkeleton />}>
+          <HeadToHeadBlock match={match} pastMeetings={pastMeetings} />
+        </Suspense>
       </Section>
 
       <Section title="Au classement" hint="Pts = points : victoire 3, nul 1, défaite 0">
-        <StandingsCompare
-          table={table}
-          home={match.homeTeam}
-          away={match.awayTeam}
-          homeRecord={homeSeason && venueRecord(homeSeason, match.homeTeam.id, "home", before)}
-          awayRecord={awaySeason && venueRecord(awaySeason, match.awayTeam.id, "away", before)}
-        />
+        <Suspense fallback={<BlockSkeleton />}>
+          <StandingsBlock match={match} table={table} homeSeason={homeSeason} awaySeason={awaySeason} />
+        </Suspense>
       </Section>
     </div>
+  );
+}
+
+async function FormBlock({ match, homeSeason, awaySeason }: { match: Match; homeSeason: Loading<Match[]>; awaySeason: Loading<Match[]> }) {
+  const [home, away] = await Promise.all([homeSeason, awaySeason]);
+  if (!home || !away) return <Unavailable />;
+
+  // On ne regarde que ce qui s'est passé AVANT ce match, même s'il est déjà joué.
+  return (
+    <div className="flex flex-col gap-5">
+      <FormRow team={match.homeTeam} entries={recentForm(home, match.homeTeam.id, match.utcDate)} />
+      <FormRow team={match.awayTeam} entries={recentForm(away, match.awayTeam.id, match.utcDate)} />
+      <p className="text-xs text-muted">V = victoire · N = match nul · D = défaite. Sous chaque pastille : l&apos;adversaire.</p>
+    </div>
+  );
+}
+
+async function HeadToHeadBlock({ match, pastMeetings }: { match: Match; pastMeetings: Loading<Match[]> }) {
+  const meetings = await pastMeetings;
+  return <HeadToHeadCard h2h={meetings && headToHead(meetings, match)} home={match.homeTeam} away={match.awayTeam} />;
+}
+
+async function StandingsBlock({
+  match,
+  table,
+  homeSeason,
+  awaySeason,
+}: {
+  match: Match;
+  table: Loading<StandingRow[]>;
+  homeSeason: Loading<Match[]>;
+  awaySeason: Loading<Match[]>;
+}) {
+  const [rows, home, away] = await Promise.all([table, homeSeason, awaySeason]);
+  return (
+    <StandingsCompare
+      table={rows}
+      home={match.homeTeam}
+      away={match.awayTeam}
+      homeRecord={home && venueRecord(home, match.homeTeam.id, "home", match.utcDate)}
+      awayRecord={away && venueRecord(away, match.awayTeam.id, "away", match.utcDate)}
+    />
   );
 }
 
@@ -95,6 +122,10 @@ function AnalysisTeaser() {
       </p>
     </section>
   );
+}
+
+function BlockSkeleton() {
+  return <div className="h-28 animate-pulse rounded-2xl bg-surface-2" />;
 }
 
 function MatchSkeleton() {

@@ -13,10 +13,40 @@ function shouldUseDemoData(): boolean {
   return process.env.DEMO_MODE === "true" || !process.env.FOOTBALL_DATA_TOKEN;
 }
 
-async function callApi<T>(path: string): Promise<T> {
+// File d'attente : comme un videur à l'entrée, on ne laisse jamais passer plus de
+// 10 appels vers l'API sur une minute glissante. Les appels en trop patientent ici.
+const MAX_CALLS_PER_MINUTE = 10;
+const recentCalls: number[] = []; // l'heure (en millisecondes) de chaque appel récent
+
+async function waitForSlot(): Promise<void> {
+  while (true) {
+    const now = Date.now();
+    while (recentCalls.length > 0 && now - recentCalls[0] > 61_000) recentCalls.shift();
+    if (recentCalls.length < MAX_CALLS_PER_MINUTE) {
+      recentCalls.push(now);
+      return;
+    }
+    // On attend que le plus ancien appel sorte de la minute glissante.
+    await new Promise((resolve) => setTimeout(resolve, 61_000 - (now - recentCalls[0]) + 100));
+  }
+}
+
+async function callApi<T>(path: string, retry = true): Promise<T> {
+  await waitForSlot();
   const response = await fetch(`${API_URL}${path}`, {
     headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_TOKEN ?? "" },
   });
+
+  // Filet de sécurité : si l'API répond quand même 429 (limite atteinte, par exemple parce qu'un
+  // autre programme utilise la même clé), elle indique dans combien de secondes (60 au maximum)
+  // le compteur repart à zéro : on patiente, puis on réessaie une seule fois.
+  // Pendant ce temps, seul le bloc concerné de la page reste en chargement.
+  if (response.status === 429 && retry) {
+    const seconds = Math.min(Number(response.headers.get("X-RequestCounter-Reset")) || 60, 60);
+    await new Promise((resolve) => setTimeout(resolve, (seconds + 1) * 1000));
+    return callApi<T>(path, false);
+  }
+
   if (!response.ok) {
     throw new Error(`football-data.org a répondu ${response.status} pour ${path}`);
   }
@@ -34,7 +64,10 @@ async function todayInParis(): Promise<string> {
 // Le cache est partagé par tous les visiteurs : 20 téléphones qui ouvrent l'app = 1 seul appel
 // à l'API (limite gratuite : 10 appels/minute). La durée dépend de la vitesse à laquelle la donnée change.
 
-// Tous les matchs d'hier, aujourd'hui et demain en un seul appel (scores rafraîchis chaque minute).
+// Nombre de jours affichés de chaque côté d'aujourd'hui (3 = une semaine de J-3 à J+3).
+export const DAYS_AROUND = 3;
+
+// Tous les matchs de la semaine en un seul appel (scores rafraîchis chaque minute).
 async function fetchMatchWindow(today: string): Promise<Match[]> {
   "use cache: remote";
   cacheLife("minutes");
@@ -42,8 +75,9 @@ async function fetchMatchWindow(today: string): Promise<Match[]> {
   const codes = COMPETITIONS.map((c) => c.code).join(",");
   // L'API raisonne en heure universelle et exclut le jour « dateTo » (vérifié le 4/11) :
   // on prend donc une marge d'un jour de chaque côté, puis on trie à l'heure de Paris.
+  // Ça fait 8 jours d'un coup, sous le maximum de 10 jours autorisé par l'API.
   const data = await callApi<{ matches: Match[] }>(
-    `/matches?competitions=${codes}&dateFrom=${shiftDate(today, -2)}&dateTo=${shiftDate(today, 2)}`,
+    `/matches?competitions=${codes}&dateFrom=${shiftDate(today, -DAYS_AROUND - 1)}&dateTo=${shiftDate(today, DAYS_AROUND + 1)}`,
   );
   return data.matches;
 }
@@ -63,10 +97,11 @@ async function fetchTeamSeason(teamId: number): Promise<Match[]> {
 }
 
 // Les anciennes confrontations ne changent pas : on les garde une journée.
+// limit=50 : sans ça l'API s'arrête à 15, et deux rivaux d'un même championnat dépassent vite ce nombre.
 async function fetchHeadToHead(matchId: number): Promise<Match[]> {
   "use cache: remote";
   cacheLife("days");
-  const data = await callApi<{ matches: Match[] }>(`/matches/${matchId}/head2head?limit=10`);
+  const data = await callApi<{ matches: Match[] }>(`/matches/${matchId}/head2head?limit=50`);
   return data.matches;
 }
 
@@ -81,7 +116,7 @@ async function fetchStandings(code: string): Promise<StandingRow[]> {
 
 // --- Fonctions utilisées par les pages ----------------------------------------------
 
-// dayOffset : -1 = hier, 0 = aujourd'hui, 1 = demain.
+// dayOffset : -1 = hier, 0 = aujourd'hui, 1 = demain… de -DAYS_AROUND à +DAYS_AROUND.
 export async function getMatchDay(dayOffset: number): Promise<MatchDay> {
   if (shouldUseDemoData()) return demoMatchDay(dayOffset);
 

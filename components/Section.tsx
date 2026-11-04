@@ -12,6 +12,10 @@ export default function Section({ title, hint, children }: { title: string; hint
 }
 
 // Message affiché quand une donnée manque (API saturée, mode démo…) : la page reste utilisable.
-export function Unavailable({ children = "Données momentanément indisponibles." }: { children?: React.ReactNode }) {
+export function Unavailable({
+  children = "Données momentanément indisponibles : réessaie dans une minute.",
+}: {
+  children?: React.ReactNode;
+}) {
   return <p className="rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-muted">{children}</p>;
 }

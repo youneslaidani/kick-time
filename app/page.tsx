@@ -4,17 +4,21 @@ import FilterChip from "@/components/FilterChip";
 import MatchCard from "@/components/MatchCard";
 import TeamCrest from "@/components/TeamCrest";
 import { competitionLabel, competitionRank } from "@/lib/competitions";
-import { formatLongDate } from "@/lib/dates";
-import { getMatchDay } from "@/lib/football";
+import { formatDayNumber, formatLongDate, formatWeekdayShort, shiftDate } from "@/lib/dates";
+import { DAYS_AROUND, getMatchDay } from "@/lib/football";
 import { isLive } from "@/lib/match-status";
 import type { Match } from "@/lib/types";
 
-// Les 3 onglets de date, écrits dans l'adresse : /?jour=hier
-const DAYS = [
-  { key: "hier", label: "Hier", offset: -1 },
-  { key: "aujourdhui", label: "Aujourd'hui", offset: 0 },
-  { key: "demain", label: "Demain", offset: 1 },
-] as const;
+// Les 7 jours proposés, de J-3 à J+3. Le jour choisi est écrit dans l'adresse :
+// /?jour=-1 pour hier, /?jour=2 pour après-demain…
+const OFFSETS = Array.from({ length: DAYS_AROUND * 2 + 1 }, (_, i) => i - DAYS_AROUND);
+
+function relativeLabel(offset: number): string {
+  if (offset === 0) return "Aujourd'hui";
+  if (offset === -1) return "Hier";
+  if (offset === 1) return "Demain";
+  return offset < 0 ? `Il y a ${-offset} jours` : `Dans ${offset} jours`;
+}
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -31,10 +35,12 @@ export default function HomePage({ searchParams }: { searchParams: SearchParams 
 
 async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const day = DAYS.find((d) => d.key === params.jour) ?? DAYS[1];
+  const requested = Number(params.jour);
+  const offset = OFFSETS.includes(requested) ? requested : 0; // valeur absente ou bizarre → aujourd'hui
   const league = typeof params.ligue === "string" ? params.ligue : null;
 
-  const { date, matches, source, sample } = await getMatchDay(day.offset);
+  const { date, matches, source, sample } = await getMatchDay(offset);
+  const today = shiftDate(date, -offset); // le jour de référence (le vrai aujourd'hui, ou celui de l'instantané démo)
   const leagues = groupByCompetition(matches);
   const visible = league ? leagues.filter((g) => g.code === league) : leagues;
   const liveCount = matches.filter((m) => isLive(m.status)).length;
@@ -42,7 +48,7 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
       <section className="mb-5">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">{day.label}</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-accent">{relativeLabel(offset)}</p>
         <h1 className="font-display text-4xl font-extrabold uppercase leading-tight sm:text-5xl">
           {formatLongDate(date)}
         </h1>
@@ -52,25 +58,30 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
         </p>
       </section>
 
-      <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl border border-line bg-surface p-1">
-        {DAYS.map((d) => (
-          <Link
-            key={d.key}
-            href={buildHref(d.key, null)}
-            className={`rounded-xl py-2 text-center text-sm font-bold transition-colors ${
-              d.key === day.key ? "bg-accent text-accent-ink" : "text-muted hover:text-text"
-            }`}
-          >
-            {d.label}
-          </Link>
-        ))}
-      </div>
+      <nav aria-label="Choisir un jour" className="mb-4 grid grid-cols-7 gap-1 rounded-2xl border border-line bg-surface p-1">
+        {OFFSETS.map((o) => {
+          const day = shiftDate(today, o);
+          return (
+            <Link
+              key={o}
+              href={buildHref(o, null)}
+              aria-current={o === offset ? "date" : undefined}
+              className={`flex flex-col items-center rounded-xl py-1.5 transition-colors ${
+                o === offset ? "bg-accent text-accent-ink" : "text-muted hover:bg-surface-2 hover:text-text"
+              }`}
+            >
+              <span className="text-[11px] font-semibold uppercase">{o === 0 ? "Auj." : formatWeekdayShort(day)}</span>
+              <span className="font-display text-xl font-bold leading-tight">{formatDayNumber(day)}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
       {leagues.length > 1 && (
         <div className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:flex-wrap">
-          <FilterChip href={buildHref(day.key, null)} active={!league} label="Tous" />
+          <FilterChip href={buildHref(offset, null)} active={!league} label="Tous" />
           {leagues.map((g) => (
-            <FilterChip key={g.code} href={buildHref(day.key, g.code)} active={league === g.code} label={competitionLabel(g.code)} />
+            <FilterChip key={g.code} href={buildHref(offset, g.code)} active={league === g.code} label={competitionLabel(g.code)} />
           ))}
         </div>
       )}
@@ -120,8 +131,8 @@ function groupByCompetition(matches: Match[]) {
   return [...groups.values()].sort((a, b) => competitionRank(a.code) - competitionRank(b.code));
 }
 
-function buildHref(jour: string, ligue: string | null) {
-  const params = new URLSearchParams({ jour });
+function buildHref(offset: number, ligue: string | null) {
+  const params = new URLSearchParams({ jour: String(offset) });
   if (ligue) params.set("ligue", ligue);
   return `/?${params}`;
 }

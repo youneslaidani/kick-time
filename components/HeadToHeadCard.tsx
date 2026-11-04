@@ -8,7 +8,16 @@ import { Unavailable } from "./Section";
 export default function HeadToHeadCard({ h2h, home, away }: { h2h: HeadToHead | null; home: Team; away: Team }) {
   if (!h2h) return <Unavailable />;
   if (h2h.played === 0) {
-    return <Unavailable>Première rencontre entre ces deux équipes dans nos données.</Unavailable>;
+    // Être honnête sur les limites des données gratuites plutôt que d'affirmer « première rencontre ».
+    return (
+      <Unavailable>
+        <span className="block font-semibold text-text">Aucune confrontation trouvée entre ces deux équipes.</span>
+        <span className="mt-1 block">
+          Nos données gratuites couvrent la Ligue des champions et les grands championnats depuis 2020 : les matchs de
+          Ligue Europa, de Ligue Conférence et de coupes nationales n&apos;y figurent pas.
+        </span>
+      </Unavailable>
+    );
   }
 
   // Largeur de chaque morceau de la barre, en pourcentage du nombre de matchs.

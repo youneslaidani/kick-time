@@ -77,6 +77,31 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — mes retours après avoir testé l'app
+
+**Ce que j'ai demandé**
+- Voir 7 jours de matchs au lieu de 3 (hier / aujourd'hui / demain).
+- Comprendre pourquoi le face-à-face était vide pour des équipes qui se sont déjà affrontées.
+
+**Ce que l'IA a fait**
+- Avant de toucher au code, elle a **cherché la cause** : tests directs de l'API et lecture des journaux du serveur.
+- Barre de 7 jours (J-3 à J+3), toujours en **un seul appel** à l'API (8 jours d'un coup, le maximum autorisé est 10).
+
+**Ce qu'on a découvert (deux causes différentes)**
+1. **Limite des données gratuites** : elles ne couvrent que 12 compétitions depuis 2020 environ. Man United – Roma se sont affrontés en Ligue Europa (2021, 2023), qui n'est pas incluse → l'API ne connaît aucune confrontation. L'app disait « Première rencontre », ce qui était faux → elle dit maintenant honnêtement ce que couvrent nos données.
+2. **Limite de 10 appels/minute** : en ouvrant plusieurs fiches d'affilée, l'API refusait des appels (erreur 429) et le bloc restait vide. Pour Atlético – Bayern, l'API avait pourtant 2 confrontations.
+
+**Solutions**
+- L'API s'arrêtait à 15 confrontations par défaut → on en demande 50 (Valence – Real Madrid : 13 matchs, contre 10 avant).
+- Chaque bloc de la fiche match se charge séparément : si l'un attend, les autres s'affichent quand même.
+- Un premier essai de « réessayer après le délai indiqué » ne suffisait pas : toutes les pages réessayaient en même temps et redépassaient la limite. On a donc ajouté une **file d'attente** qui n'envoie jamais plus de 10 appels par minute.
+- Test : 4 fiches jamais ouvertes à la suite → les 4 complètes (la 3e a attendu une minute).
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date
