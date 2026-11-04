@@ -17,7 +17,7 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Les clés API ne sortent jamais du serveur : jamais de `NEXT_PUBLIC_` pour une clé.
 - Toute donnée externe passe par `lib/football.ts` ; si l'API échoue ou si `DEMO_MODE=true`, on bascule sur `data/demo/`.
 - Les chiffres (forme, face-à-face, écarts) sont **calculés par le code** dans `lib/stats.ts`. L'IA ne fait que les expliquer.
-- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements), sauf ajout demandé par l'élève (ex. : barre de probabilités, 4/11).
+- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements), sauf ajout demandé par l'élève (ex. : barre de probabilités et joueur à surveiller, 4/11).
 
 ## Ce que donne l'API football-data.org gratuite (testé le 4/11/2026)
 - `/matches?competitions=…&dateFrom=…&dateTo=…` : `dateTo` est **exclu**. Pas de champ `minute`.
@@ -45,6 +45,11 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 ## Probabilités « Qui part favori ? »
 - `lib/probabilities.ts` : modèle de Poisson calculé par le code (buts marqués/encaissés par match cette saison, bonus domicile ×1,15, prudence = 4 matchs « moyens » ajoutés, rien sous 3 matchs joués). Testé dans `probabilities.test.ts`.
 - Présenté comme une **estimation statistique**, pas un pronostic de pari. Les pourcentages sont aussi donnés à l'IA pour que sa jauge de suspense soit cohérente ; elle peut dire qui part favori, jamais qui va gagner.
+
+## Joueur à surveiller (fiche match)
+- Choisi par le code (`lib/players.ts`) : meilleur buteur des deux équipes dans la compétition, via `/competitions/{code}/scorers?limit=100` (gratuit, 1 appel par compétition, cache 1 h). Rien ne s'affiche si personne n'a marqué.
+- Photo : API de Wikipédia (`lib/player-photo.ts`), images libres de Wikimedia Commons, crédit affiché sous la carte. On vérifie que la page décrit un footballeur né la même année (le 1er résultat peut être un homonyme : Mark au lieu de Jude Bellingham). Sans photo → initiales.
+- L'IA ne parle toujours d'aucun joueur : la phrase de la carte est écrite par le code.
 
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.

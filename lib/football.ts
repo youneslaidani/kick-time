@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import { COMPETITIONS } from "./competitions";
 import { parisDate, shiftDate } from "./dates";
 import { demoMatch, demoMatchDay } from "./demo";
-import type { Match, MatchDay, StandingRow } from "./types";
+import type { Match, MatchDay, Scorer, StandingRow } from "./types";
 
 // Toutes les données de foot passent par ce fichier.
 // Le token reste sur le serveur : il n'est jamais envoyé au navigateur.
@@ -127,6 +127,14 @@ async function fetchStandings(code: string): Promise<StandingRow[]> {
   return data.standings.find((s) => s.type === "TOTAL")?.table ?? [];
 }
 
+// Les 100 meilleurs buteurs d'une compétition (sert au « joueur à surveiller »).
+async function fetchScorers(code: string): Promise<Scorer[]> {
+  "use cache: remote";
+  cacheLife("hours");
+  const data = await callApi<{ scorers: Scorer[] }>(`/competitions/${code}/scorers?limit=100`);
+  return data.scorers;
+}
+
 // --- Fonctions utilisées par les pages ----------------------------------------------
 
 // dayOffset : -1 = hier, 0 = aujourd'hui, 1 = demain… de -DAYS_AROUND à +DAYS_AROUND.
@@ -162,6 +170,7 @@ export async function getMatch(id: number): Promise<Match | null> {
 export const getTeamSeason = (teamId: number) => safely(() => fetchTeamSeason(teamId));
 export const getHeadToHead = (matchId: number) => safely(() => fetchHeadToHead(matchId));
 export const getStandings = (code: string) => safely(() => fetchStandings(code));
+export const getScorers = (code: string) => safely(() => fetchScorers(code));
 
 async function safely<T>(load: () => Promise<T>): Promise<T | null> {
   if (shouldUseDemoData()) return null;

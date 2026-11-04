@@ -60,6 +60,21 @@ export type StandingRow = {
   goalDifference: number;
 };
 
+// Un buteur, tel que renvoyé par /competitions/{code}/scorers.
+export type Scorer = {
+  player: {
+    id: number;
+    name: string;
+    dateOfBirth: string | null; // AAAA-MM-JJ
+    section: string | null; // « Offence », « Midfield », « Defence », « Goalkeeper »
+    shirtNumber: number | null;
+  };
+  team: { id: number; shortName: string; tla: string; crest: string };
+  playedMatches: number;
+  goals: number;
+  assists: number | null;
+};
+
 // Ce que reçoit l'écran des matchs : la journée affichée + d'où viennent les données.
 export type MatchDay = {
   date: string; // AAAA-MM-JJ, heure de Paris

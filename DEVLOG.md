@@ -153,6 +153,29 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — mon idée : « Le joueur à surveiller », avec sa photo
+
+**Ce que j'ai demandé**
+- Pour chaque match, un joueur à surveiller avec sa photo, entre l'analyse IA et la forme du moment.
+
+**Ce qu'on a décidé ensemble**
+- Le joueur est **choisi par le code à partir de vrais chiffres** : le meilleur buteur des deux équipes dans la compétition (l'API gratuite donne les 100 meilleurs buteurs). L'IA ne parle toujours d'aucun joueur, pour qu'elle ne puisse rien inventer.
+- La photo vient de **Wikipédia / Wikimedia Commons** (images sous licence libre), avec le crédit affiché.
+
+**Résultat** : Valence – Real Madrid → Kylian Mbappé (12 buts en 11 matchs, 2 passes décisives) ; Lens – Côme → Anastasios Douvikas (3 buts en 3 matchs).
+
+**Problèmes rencontrés et solutions**
+- **Le piège des homonymes** : en cherchant « Jude Bellingham », Wikipédia renvoie d'abord **Mark** Bellingham, né en 1976 ! → le code vérifie que la page décrit un footballeur **né la même année** que le joueur de l'API (+ test automatique avec ce cas réel).
+- Certains joueurs n'ont pas de photo libre (ex. Hugo Duro) → on affiche leurs initiales.
+- L'âge est calculé au jour du match, pas au jour où on ouvre l'app.
+
+**Tests automatiques** : 40.
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

@@ -5,12 +5,15 @@ import AnalysisCard, { AnalysisSkeleton } from "@/components/AnalysisCard";
 import FormRow from "@/components/FormRow";
 import HeadToHeadCard from "@/components/HeadToHeadCard";
 import MatchHeader from "@/components/MatchHeader";
+import PlayerToWatch from "@/components/PlayerToWatch";
 import Section, { Unavailable } from "@/components/Section";
 import StandingsCompare from "@/components/StandingsCompare";
 import WinProbabilityBar from "@/components/WinProbabilityBar";
 import { getAnalysis } from "@/lib/ai";
 import { buildFacts } from "@/lib/analysis";
-import { getHeadToHead, getMatch, getStandings, getTeamSeason } from "@/lib/football";
+import { getHeadToHead, getMatch, getScorers, getStandings, getTeamSeason } from "@/lib/football";
+import { getPlayerPhoto } from "@/lib/player-photo";
+import { playerToWatch } from "@/lib/players";
 import { probabilitiesFor } from "@/lib/probabilities";
 import { headToHead, recentForm, venueRecord } from "@/lib/stats";
 import type { Match, StandingRow } from "@/lib/types";
@@ -59,6 +62,10 @@ async function MatchView({ params }: { params: Params }) {
         <AnalysisBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} pastMeetings={pastMeetings} table={table} />
       </Suspense>
 
+      <Suspense fallback={<div className="h-56 animate-pulse rounded-3xl bg-surface" />}>
+        <PlayerBlock match={match} />
+      </Suspense>
+
       <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
         <Suspense fallback={<BlockSkeleton />}>
           <FormBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
@@ -78,6 +85,15 @@ async function MatchView({ params }: { params: Params }) {
       </Section>
     </div>
   );
+}
+
+// Le meilleur buteur des deux équipes, avec sa photo Wikipédia (rien ne s'affiche si personne n'a marqué).
+async function PlayerBlock({ match }: { match: Match }) {
+  const scorers = await getScorers(match.competition.code);
+  const scorer = scorers && playerToWatch(scorers, match);
+  if (!scorer) return null;
+  const photo = await getPlayerPhoto(scorer.player.name, scorer.player.dateOfBirth);
+  return <PlayerToWatch scorer={scorer} photo={photo} match={match} />;
 }
 
 async function FormBlock({ match, homeSeason, awaySeason }: { match: Match; homeSeason: Loading<Match[]>; awaySeason: Loading<Match[]> }) {
