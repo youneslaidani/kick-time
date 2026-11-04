@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Inter } from "next/font/google";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import "./globals.css";
 
@@ -16,9 +17,14 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+// Les icônes (onglet, écran d'accueil) sont dans app/icon.svg, app/favicon.ico et app/apple-icon.png :
+// Next.js les ajoute tout seul. Elles sont fabriquées par scripts/generate-icons.mjs.
 export const metadata: Metadata = {
   title: "Kick-Time",
   description: "Les résultats de foot en direct, et l'IA qui t'explique les enjeux de chaque match.",
+  applicationName: "Kick-Time",
+  // Sur iPhone, « Ajouter à l'écran d'accueil » ouvre l'app en plein écran, avec ce nom.
+  appleWebApp: { title: "Kick-Time", capable: true, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
@@ -31,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

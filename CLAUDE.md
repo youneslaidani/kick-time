@@ -70,6 +70,10 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Ton : drôle mais jamais aux dépens d'un public ; on rit du foot lui-même (VAR interminable, simulations, phrases d'entraîneurs).
 - Gros bouton 🤢 qui se tortille en haut de l'accueil, à côté de « Trouve ton équipe ».
 
+## Icônes et partage
+- Icônes générées par `node scripts/generate-icons.mjs` (logo = `components/Logo.tsx`) : `app/icon.svg`, `app/favicon.ico`, `app/apple-icon.png`, `public/icons/*.png` ; manifeste dans `app/manifest.ts`.
+- Page `/qr` (à projeter) : QR code de l'adresse publique, logo au centre (correction « H »), cibles `?cible=equipe|foot`. En local, utilise l'adresse wifi du PC (`lib/share.ts`, testé). Lisibilité vérifiée avec un décodeur de QR code.
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).

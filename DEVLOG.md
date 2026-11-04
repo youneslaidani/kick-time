@@ -265,6 +265,26 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — le logo partout et un QR code pour le jury
+
+**Ce que j'ai demandé**
+- Le logo de l'app dans l'onglet du navigateur et comme icône d'application.
+- Un QR code que le jury pourra scanner pendant la présentation pour ouvrir l'app sur son téléphone.
+
+**Ce que l'IA a fait**
+- Un script (`scripts/generate-icons.mjs`) fabrique toutes les icônes à partir du logo : favicon (onglet), icône iPhone, icônes Android. Plus un « manifeste » : sur téléphone, « Ajouter à l'écran d'accueil » installe Kick-Time avec son logo, comme une vraie application.
+- Une page **/qr** à projeter : un grand QR code avec le logo au centre, et le choix de la page à ouvrir (accueil, quiz, « Tu comprends rien au foot ? »).
+- Le QR code s'adapte tout seul : une fois l'app en ligne, il contient l'adresse publique ; en local, il utilise l'adresse du PC sur le wifi (pour tester avec mon téléphone avant la mise en ligne).
+- Un pied de page avec les sources des données (football-data.org, Gemini, Wikimedia Commons) et un lien « Partager l'app (QR code) ».
+
+**Vérification** : le QR code avec le logo au centre a été **décodé par un lecteur de QR code** (comme le ferait un téléphone), sur 3 adresses différentes, avec un logo plus grand que le vrai par sécurité : lu à chaque fois.
+
+**À faire** : la mise en ligne sur Vercel, sans quoi le jury ne pourra pas ouvrir l'app (son téléphone ne voit pas mon PC).
+
+**Tests automatiques** : 64.
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date
