@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Unavailable } from "@/components/Section";
 import TeamQuiz from "@/components/TeamQuiz";
@@ -28,6 +29,9 @@ export default function MyTeamPage() {
 
 // Côté serveur : on rassemble les vraies infos des ~100 clubs, puis le quiz tourne dans le navigateur.
 async function QuizLoader() {
+  // On attend une vraie visite : sans ça, Next.js chargerait ces données pendant la compilation,
+  // ce qui peut échouer si l'API est occupée (limite de 10 appels/minute).
+  await connection();
   const [upcoming, ...leagues] = await Promise.all([
     getUpcomingMatches(),
     ...LEAGUES.map(async (code) => ({ code, teams: await getTeams(code), table: await getStandings(code) })),
