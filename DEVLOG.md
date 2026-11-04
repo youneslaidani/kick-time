@@ -285,6 +285,25 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — mise en ligne : https://kick-time.vercel.app
+
+**Pourquoi** : le jury scannera le QR code en 4G/5G, pas sur le wifi de mon PC → l'app doit avoir une vraie adresse internet.
+
+**Étapes**
+1. Vérification qu'aucune clé secrète n'est dans les fichiers envoyés (79 fichiers analysés).
+2. Code envoyé sur GitHub : https://github.com/youneslaidani/kick-time (tout l'historique des commits est visible).
+3. Import du dépôt sur Vercel (gratuit) : chaque envoi sur GitHub met l'app en ligne automatiquement.
+
+**Problèmes rencontrés et solutions**
+- L'app en ligne affichait les matchs d'exemple. Pour comprendre sans jamais afficher mes clés, on a créé une page **/sante** : elle dit si chaque clé est présente et si l'API répond. Verdict : clés « absentes ».
+- Cause 1 : les clés avaient été enregistrées seulement pour l'environnement « Development », pas « Production ».
+- Cause 2 : une clé de type « Secret » ne peut plus changer d'environnement → il a fallu les recréer directement dans Production.
+- Piège : la traduction automatique du navigateur traduisait l'interface de Vercel… et même le nom de ma variable (« GEMINI_API_KEY » affiché « CLÉ_API_GEMINI ») → toujours vérifier les noms en version originale.
+- Résultat : /sante tout vert, vrais matchs en ligne, fiche match complète (15 s la 1re fois, 0,3 s ensuite grâce au cache), QR code avec l'adresse publique.
+- Leçon : en ligne, l'app peut tourner sur plusieurs serveurs à la fois, donc la limite de 10 appels/minute se fait sentir au premier chargement → **préchauffer le cache avant l'oral** (et ne plus rien envoyer sur GitHub ensuite : chaque mise en ligne vide le cache).
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date
