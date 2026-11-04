@@ -26,8 +26,16 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - `/teams/{id}/matches?status=FINISHED` : uniquement les compétitions couvertes, ordre chronologique.
 - Limite stricte de 10 appels/minute (erreur 429 au-delà) → toujours passer par le cache.
 
+## Ce que donne Gemini gratuit (testé le 4/11/2026)
+- Clé au nouveau format `AQ.…` (53 caractères), envoyée dans l'en-tête `x-goog-api-key` (jamais dans l'URL).
+- `gemini-3.6-flash` répond en 2 à 10 s. `gemini-2.5-flash` n'est plus ouvert aux nouveaux comptes ; `gemini-3.8-flash` et `gemini-flash-latest` ont renvoyé 503 (« forte demande ») → essayer une liste de modèles dans l'ordre, puis l'analyse de secours.
+- JSON fiable avec `generationConfig.responseMimeType: "application/json"` + `responseSchema`.
+- `thinkingConfig.thinkingLevel: "low"` : ~6 s au lieu de ~11 s, mais une faute d'orthographe observée → à trancher au J4 (le cache rend la latence moins critique).
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
+- Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).
+- Fournir des matchs **datés, dans un ordre annoncé** (« du plus récent au plus ancien ») : sans ça, l'IA a inversé la forme d'une équipe.
 - N'utiliser que les données fournies ; aucun nom de joueur.
 - Aucun pronostic de pari, aucun score exact prédit.
 - Réponse en JSON validé ; si invalide → analyse de secours.

@@ -27,12 +27,20 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 - L'IA a testé l'API football-data.org avant d'écrire la suite : matchs, classements, face-à-face et derniers matchs d'une équipe fonctionnent en gratuit.
 - L'écran affiche maintenant les **vrais matchs** du jour (9 matchs de Ligue des champions le 4/11).
 
+**Premier test de l'analyse IA (Toulouse – Strasbourg, 6/11)**
+- Le code calcule les chiffres (classement, 5 derniers matchs, 9 confrontations depuis 2020), puis Gemini les explique en JSON.
+- **L'IA s'est trompée** : elle a écrit que Strasbourg « a perdu ses 4 derniers matchs après une victoire 5-1 », alors que le 5-1 est le match **le plus récent**. Les matchs lui étaient donnés sans ordre clair.
+- Solution : le code envoie maintenant chaque match **avec sa date**, du plus récent au plus ancien. Après correction, l'analyse est juste.
+- Leçon : l'IA explique bien, mais elle peut mal interpréter des données ambiguës → c'est au code de préparer des données claires, et à moi de vérifier.
+- En réduisant la « réflexion » de l'IA, la réponse passe de 11 s à 6 s.
+
 **Problèmes rencontrés et solutions**
 - Pas de budget pour l'IA → offre gratuite de Gemini + cache (une seule analyse par match).
 - Le plan gratuit de football-data.org donne des scores légèrement différés → on l'assume et on l'explique.
 - Pendant les tests, on a dépassé la limite de 10 appels par minute (erreur 429) → preuve que le cache est indispensable pendant la démo, quand toute la salle ouvre l'app.
 - Le bilan « victoires / défaites » renvoyé par l'API pour le face-à-face est faux (tout à 0) → on le recalculera nous-mêmes à partir de la liste des matchs.
-- Ma première clé Gemini était refusée : j'avais copié le nom du projet Google au lieu de la clé (une vraie clé commence par `AIza`).
+- Ma première clé Gemini était refusée : j'avais copié le nom du projet Google (`gen-lang-client-…`) au lieu de la clé. L'IA s'est aussi trompée : elle m'a dit qu'une clé commence toujours par `AIza`, alors que les nouvelles clés Google commencent par `AQ.`.
+- Deux modèles Gemini ont répondu « trop de demande » (erreur 503) → l'app essaiera un autre modèle, puis une analyse de secours.
 - Next.js refusait de lire l'heure trop tôt (la date du jour aurait été figée) → on attend la visite de l'utilisateur avant de calculer « aujourd'hui ».
 - L'en-tête dépassait de l'écran sur les petits téléphones (320 px) → logo seul sur les très petits écrans.
 
