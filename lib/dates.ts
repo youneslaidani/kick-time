@@ -24,6 +24,16 @@ export function formatLongDate(isoDate: string): string {
   }).format(new Date(`${isoDate}T12:00:00Z`));
 }
 
+// « 3 mai 2026 »
+export function formatShortDate(utcDate: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TIME_ZONE,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(utcDate));
+}
+
 // « 21:00 »
 export function formatKickoff(utcDate: string): string {
   return new Intl.DateTimeFormat("fr-FR", {

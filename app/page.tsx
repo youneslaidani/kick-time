@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import FilterChip from "@/components/FilterChip";
 import MatchCard from "@/components/MatchCard";
 import TeamCrest from "@/components/TeamCrest";
 import { competitionLabel, competitionRank } from "@/lib/competitions";
@@ -66,7 +67,7 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
       </div>
 
       {leagues.length > 1 && (
-        <div className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1">
+        <div className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:flex-wrap">
           <FilterChip href={buildHref(day.key, null)} active={!league} label="Tous" />
           {leagues.map((g) => (
             <FilterChip key={g.code} href={buildHref(day.key, g.code)} active={league === g.code} label={competitionLabel(g.code)} />
@@ -123,19 +124,6 @@ function buildHref(jour: string, ligue: string | null) {
   const params = new URLSearchParams({ jour });
   if (ligue) params.set("ligue", ligue);
   return `/?${params}`;
-}
-
-function FilterChip({ href, active, label }: { href: string; active: boolean; label: string }) {
-  return (
-    <Link
-      href={href}
-      className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-        active ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-text"
-      }`}
-    >
-      {label}
-    </Link>
-  );
 }
 
 function EmptyState() {

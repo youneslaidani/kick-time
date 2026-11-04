@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatKickoff } from "@/lib/dates";
 import { isFinished, isLive, statusLabel } from "@/lib/match-status";
 import type { Match, Team } from "@/lib/types";
@@ -13,9 +14,13 @@ export default function MatchCard({ match }: { match: Match }) {
   const winner = match.score.winner;
 
   return (
-    <article
+    // prefetch={false} : sans ça, Next.js préchargerait toutes les fiches visibles
+    // et dépenserait nos 10 appels/minute sur des pages que personne n'ouvre.
+    <Link
+      href={`/match/${match.id}`}
+      prefetch={false}
       className={`grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border px-3 py-3.5 transition-colors sm:px-5 ${
-        live ? "border-live/40 bg-live/[0.06]" : "border-line bg-surface hover:border-accent/40"
+        live ? "border-live/40 bg-live/[0.06] hover:border-live/70" : "border-line bg-surface hover:border-accent/40"
       }`}
     >
       <TeamSide team={match.homeTeam} side="home" dimmed={winner === "AWAY_TEAM"} />
@@ -48,7 +53,7 @@ export default function MatchCard({ match }: { match: Match }) {
       </div>
 
       <TeamSide team={match.awayTeam} side="away" dimmed={winner === "HOME_TEAM"} />
-    </article>
+    </Link>
   );
 }
 

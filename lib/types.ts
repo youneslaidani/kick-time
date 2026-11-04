@@ -46,6 +46,20 @@ export type Match = {
   score: Score;
 };
 
+// Une ligne du classement d'un championnat.
+export type StandingRow = {
+  position: number;
+  team: Team;
+  playedGames: number;
+  won: number;
+  draw: number;
+  lost: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+};
+
 // Ce que reçoit l'écran des matchs : la journée affichée + d'où viennent les données.
 export type MatchDay = {
   date: string; // AAAA-MM-JJ, heure de Paris

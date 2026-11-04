@@ -49,6 +49,34 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — mercredi 4 novembre 2026 : fiche match et classements
+
+*On avait un jour d'avance : on a enchaîné sur le programme du jour 3.*
+
+**Ce que j'ai demandé**
+- Continuer avec la fiche match et la page des classements.
+
+**Ce que l'IA a fait**
+- Elle a d'abord vérifié ce que l'API renvoie pour un match, une équipe et le classement de la Ligue des champions (36 équipes).
+- Elle a écrit `lib/stats.ts` (forme, points, face-à-face, bilan domicile/extérieur) avec **13 tests automatiques** (`npm test`), écrits avant de brancher l'interface.
+- Fiche match : en-tête, forme du moment (pastilles V/N/D avec le logo de l'adversaire), face-à-face, comparaison au classement. Un emplacement est prêt pour l'analyse IA.
+- Page Classements : 6 championnats, zones colorées (Europe, barrage, relégation) et une légende pour les débutants.
+
+**Ce que j'ai décidé / corrigé**
+- *(à compléter : ce que j'ai regardé, ce que j'ai voulu changer)*
+
+**Problèmes rencontrés et solutions**
+- Risque de dépasser les 10 appels/minute : Next.js précharge les pages des liens visibles. Une page d'accueil avec 9 matchs = des dizaines d'appels inutiles → préchargement désactivé sur les liens des matchs et des championnats.
+- Tous les matchs d'hier à demain sont chargés en **un seul appel**, partagé entre l'accueil et les fiches.
+- Vérification du cache : 5 visites de la même page = **1 seul appel** à l'API.
+- Le menu bloquait l'affichage des fiches match (il lisait l'adresse trop tôt) → il affiche d'abord les liens, puis surligne l'onglet actif.
+- Si une donnée manque (API saturée), la section affiche « Données momentanément indisponibles » au lieu de faire planter la page.
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

@@ -4,19 +4,34 @@
 // pour surligner le bon onglet.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 const LINKS = [
   { href: "/", label: "Matchs" },
   { href: "/classements", label: "Classements" },
 ];
 
+// L'adresse de la page n'est connue qu'au moment de la visite : on affiche d'abord les liens
+// sans surlignage (Suspense), pour ne pas bloquer l'affichage du reste de la page.
 export default function NavLinks() {
-  const pathname = usePathname();
+  return (
+    <Suspense fallback={<Links pathname={null} />}>
+      <ActiveLinks />
+    </Suspense>
+  );
+}
 
+function ActiveLinks() {
+  return <Links pathname={usePathname()} />;
+}
+
+function Links({ pathname }: { pathname: string | null }) {
   return (
     <nav className="flex gap-1">
       {LINKS.map((link) => {
-        const active = link.href === "/" ? pathname === "/" || pathname.startsWith("/match") : pathname.startsWith(link.href);
+        const active =
+          pathname !== null &&
+          (link.href === "/" ? pathname === "/" || pathname.startsWith("/match") : pathname.startsWith(link.href));
         return (
           <Link
             key={link.href}

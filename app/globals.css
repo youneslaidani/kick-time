@@ -12,6 +12,8 @@
   --color-accent: #2bff88; /* vert pelouse fluo */
   --color-accent-ink: #03140a; /* texte posé sur le vert */
   --color-live: #ff3d5a;
+  --color-away: #5ab4ff; /* couleur de l'équipe à l'extérieur dans les comparaisons */
+  --color-warn: #f5c542; /* zone de barrage au classement */
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-barlow);

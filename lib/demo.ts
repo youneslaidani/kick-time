@@ -18,3 +18,7 @@ export function demoMatchDay(dayOffset: number): MatchDay {
     sample: demo.sample,
   };
 }
+
+export function demoMatch(id: number): Match | null {
+  return demo.matches.find((m) => m.id === id) ?? null;
+}
