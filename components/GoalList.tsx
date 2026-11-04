@@ -3,7 +3,7 @@ import type { Match } from "@/lib/types";
 type Goals = NonNullable<Match["live"]>["goals"];
 
 // Les buteurs d'une équipe : « ⚽ Aboubakary Koita 12' », avec (pén.) ou (csc) si besoin.
-// compact : nom court (« A. Koita ») pour les petites cartes de l'accueil.
+// compact : nom de famille seul (« Koita ») pour les petites cartes de l'accueil.
 export default function GoalList({
   goals,
   side,

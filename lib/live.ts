@@ -18,7 +18,7 @@ const ESPN_LEAGUE: Record<string, string> = {
 export type Goal = {
   minute: string; // « 12' », « 45'+2' »
   scorer: string;
-  scorerShort: string; // « A. Koita » : pour les petites cartes
+  scorerShort: string; // « Koita » : le nom de famille seul, pour les petites cartes
   side: "home" | "away"; // l'équipe qui en profite
   penalty: boolean;
   ownGoal: boolean;
@@ -82,12 +82,22 @@ export function toEspnEvent(raw: RawEvent): EspnEvent {
       .map((d) => ({
         minute: d.clock?.displayValue ?? "",
         scorer: d.athletesInvolved?.[0]?.displayName ?? "Buteur inconnu",
-        scorerShort: d.athletesInvolved?.[0]?.shortName ?? d.athletesInvolved?.[0]?.displayName ?? "Buteur inconnu",
+        scorerShort: surname(d.athletesInvolved?.[0]?.shortName, d.athletesInvolved?.[0]?.displayName),
         teamId: d.team?.id ?? "",
         penalty: Boolean(d.penaltyKick),
         ownGoal: Boolean(d.ownGoal),
       })),
   };
+}
+
+// Le nom de famille seul, pour qu'il tienne sur un téléphone :
+// « A. Koita » → « Koita », « A. Mac Allister » → « Mac Allister » (sinon : on retire le prénom du nom complet).
+export function surname(shortName?: string, fullName?: string): string {
+  const withoutInitials = shortName?.replace(/^(\p{L}\.\s*)+/u, "").trim();
+  if (withoutInitials) return withoutInitials;
+  const words = (fullName ?? "").trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "Buteur inconnu";
+  return words.length > 1 ? words.slice(1).join(" ") : words[0];
 }
 
 // --- Retrouver le même match dans les deux sources -------------------------------------

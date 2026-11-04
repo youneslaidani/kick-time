@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyLive, findEspnEvent, nameWords, toEspnEvent, type EspnEvent } from "./live";
+import { applyLive, findEspnEvent, nameWords, surname, toEspnEvent, type EspnEvent } from "./live";
 import { match } from "./test-fixtures";
 import type { Team } from "./types";
 
@@ -40,7 +40,21 @@ describe("toEspnEvent", () => {
     const event = toEspnEvent(raw("2026-11-04T17:45Z", "AEK Athens", "Real Madrid", "1", "0"));
     expect(event.teams.map((t) => t.score)).toEqual([1, 0]);
     expect(event.clock).toBe("18'");
-    expect(event.goals).toEqual([{ minute: "12'", scorer: "Aboubakary Koita", scorerShort: "A. Koita", teamId: "887", penalty: false, ownGoal: false }]);
+    expect(event.goals).toEqual([{ minute: "12'", scorer: "Aboubakary Koita", scorerShort: "Koita", teamId: "887", penalty: false, ownGoal: false }]);
+  });
+});
+
+describe("surname (le nom qui tient sur un téléphone)", () => {
+  it("garde seulement le nom de famille", () => {
+    expect(surname("A. Koita", "Aboubakary Koita")).toBe("Koita");
+    expect(surname("K. Mbappé", "Kylian Mbappé")).toBe("Mbappé");
+    expect(surname("A. Mac Allister", "Alexis Mac Allister")).toBe("Mac Allister");
+  });
+
+  it("se débrouille sans nom court, ou avec un seul nom", () => {
+    expect(surname(undefined, "Aboubakary Koita")).toBe("Koita");
+    expect(surname("Rodrygo", "Rodrygo")).toBe("Rodrygo");
+    expect(surname(undefined, undefined)).toBe("Buteur inconnu");
   });
 });
 
@@ -80,7 +94,7 @@ describe("applyLive (mettre le match à jour)", () => {
     const updated = applyLive(aekReal, toEspnEvent(raw("2026-11-04T17:45Z", "AEK Athens", "Real Madrid", "1", "0")));
     expect(updated.score.fullTime).toEqual({ home: 1, away: 0 });
     expect(updated.status).toBe("IN_PLAY");
-    expect(updated.live).toEqual({ clock: "18'", goals: [{ minute: "12'", scorer: "Aboubakary Koita", scorerShort: "A. Koita", side: "home", penalty: false, ownGoal: false }] });
+    expect(updated.live).toEqual({ clock: "18'", goals: [{ minute: "12'", scorer: "Aboubakary Koita", scorerShort: "Koita", side: "home", penalty: false, ownGoal: false }] });
   });
 
   it("passe en « Mi-temps » à la pause et en « Terminé » à la fin, avec le vainqueur", () => {
