@@ -67,9 +67,6 @@ describe("parseAnalysis (vérification de la réponse de l'IA)", () => {
   const valid = {
     enjeu: "Un duel serré.",
     resume: "Deux équipes proches.",
-    forme_domicile: "Toulouse alterne.",
-    forme_exterieur: "Strasbourg peine.",
-    face_a_face: "Toulouse a gagné le dernier.",
     a_surveiller: ["L'attaque de Toulouse."],
     suspense: 4,
     suspense_raison: "Peu d'écart.",

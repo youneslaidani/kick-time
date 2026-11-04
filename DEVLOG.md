@@ -238,6 +238,16 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — alléger l'analyse IA
+
+**Ce que j'ai remarqué** : l'analyse IA répétait la forme et le face-à-face, alors qu'ils sont déjà affichés plus bas en graphiques, bien plus parlants.
+
+**Ce que j'ai décidé** : retirer ces deux parties de la carte… et aussi **de ce qu'on demande à l'IA** : elle écrit moins de texte (réponse plus rapide), mais reçoit toujours ces chiffres pour l'enjeu, le résumé et le suspense. Nouvelle consigne : « ne les détaille pas, ils sont déjà affichés en graphiques ».
+
+**Au passage** : l'IA avait écrit « 59 pourcent » → nouvelle règle « écris les pourcentages avec le symbole % ». Vérifié : « 59 % ».
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

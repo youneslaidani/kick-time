@@ -129,9 +129,6 @@ function describeFormSummary(form: FormEntry[]): string {
 export type AnalysisContent = {
   enjeu: string;
   resume: string;
-  forme_domicile: string;
-  forme_exterieur: string;
-  face_a_face: string;
   a_surveiller: string[];
   suspense: number; // de 1 (match déséquilibré) à 5 (très indécis)
   suspense_raison: string;
@@ -158,7 +155,7 @@ export function parseAnalysis(text: string): AnalysisContent | null {
   const d = data as Record<string, unknown>;
 
   const isText = (v: unknown) => typeof v === "string" && v.trim().length > 0;
-  const texts = ["enjeu", "resume", "forme_domicile", "forme_exterieur", "face_a_face", "suspense_raison"];
+  const texts = ["enjeu", "resume", "suspense_raison"];
   if (!texts.every((key) => isText(d[key]))) return null;
   if (!Array.isArray(d.a_surveiller) || !d.a_surveiller.every(isText) || d.a_surveiller.length === 0) return null;
   if (!Number.isInteger(d.suspense) || (d.suspense as number) < 1 || (d.suspense as number) > 5) return null;
@@ -167,9 +164,6 @@ export function parseAnalysis(text: string): AnalysisContent | null {
   return {
     enjeu: d.enjeu as string,
     resume: d.resume as string,
-    forme_domicile: d.forme_domicile as string,
-    forme_exterieur: d.forme_exterieur as string,
-    face_a_face: d.face_a_face as string,
     a_surveiller: (d.a_surveiller as string[]).slice(0, 3),
     suspense: d.suspense as number,
     suspense_raison: d.suspense_raison as string,
@@ -220,14 +214,10 @@ export function simpleAnalysis(facts: MatchFacts): Analysis {
     watch.push(`La défense de ${defense.nom} : ${defense.classement!.buts_encaisses} buts encaissés en ${defense.classement!.matchs_joues} matchs.`);
   }
 
-  const h2h = facts.face_a_face;
   return {
     source: "secours",
     enjeu,
     resume: `${home.nom}${hc ? ` (${rank(hc.position)})` : ""} joue à domicile contre ${away.nom}${ac ? ` (${rank(ac.position)})` : ""}. Voici les chiffres clés pour comprendre ce match.`,
-    forme_domicile: home.bilan_des_5_derniers ? `${home.nom} : ${home.bilan_des_5_derniers} sur ses 5 derniers matchs.` : `Forme récente de ${home.nom} indisponible.`,
-    forme_exterieur: away.bilan_des_5_derniers ? `${away.nom} : ${away.bilan_des_5_derniers} sur ses 5 derniers matchs.` : `Forme récente de ${away.nom} indisponible.`,
-    face_a_face: h2h && h2h.nombre > 0 ? `${count(h2h.nombre, "confrontation")} depuis 2020 : ${h2h.bilan}.` : "Aucune confrontation connue entre ces deux équipes dans nos données.",
     a_surveiller: watch.length > 0 ? watch : ["Le classement et la forme des deux équipes, détaillés plus bas."],
     suspense,
     suspense_raison: suspense >= 4 ? "Les deux équipes sont proches, au classement comme en forme." : suspense <= 2 ? "Une équipe semble nettement au-dessus sur les derniers résultats." : "Un léger avantage pour une équipe, mais rien n'est joué.",

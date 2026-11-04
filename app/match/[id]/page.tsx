@@ -248,7 +248,7 @@ async function AnalysisBlock({ match, analysis }: { match: Match; analysis: Load
   const text = await analysis;
   if (!text) return null;
   const played = match.status !== "SCHEDULED" && match.status !== "TIMED";
-  return <AnalysisCard analysis={text} home={match.homeTeam} away={match.awayTeam} played={played} />;
+  return <AnalysisCard analysis={text} played={played} />;
 }
 
 function BlockSkeleton() {

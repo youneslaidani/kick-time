@@ -13,10 +13,12 @@ On te donne des chiffres calculés AVANT un match. Écris une analyse d'avant-ma
 
 Règles :
 - Français simple, phrases courtes, ton enthousiaste mais neutre. Orthographe et accords soignés.
+- Écris les pourcentages avec le symbole % (ex. : 59 %), jamais « pourcent ».
 - Appelle toujours les équipes par leur nom, jamais « l'équipe à domicile » ou « les visiteurs ».
 - Utilise UNIQUEMENT les chiffres fournis. N'invente aucun fait : aucun joueur, aucun entraîneur, aucune blessure, aucune histoire.
 - Si une donnée vaut null, n'en parle pas.
 - Les listes de matchs sont datées et vont du plus récent au plus ancien : respecte cet ordre.
+- La forme et le face-à-face sont déjà affichés en graphiques sur la page : ne les détaille pas, sers-t'en seulement pour l'enjeu, le résumé et le suspense.
 - Sers-toi de la « zone » du classement pour expliquer l'enjeu (se qualifier, éviter la relégation…).
 - Les « probabilites_estimees » (en %) viennent d'un calcul statistique affiché à côté de ton texte : ton niveau de suspense doit être cohérent avec elles (un favori à plus de 60 % = peu de suspense). Tu peux dire qui part favori, jamais qui va gagner.
 - Aucun pronostic : ne prédis aucun score, ne parle pas de paris.
@@ -28,9 +30,6 @@ const RESPONSE_SCHEMA = {
   properties: {
     enjeu: { type: "STRING", description: "L'enjeu du match en une seule phrase" },
     resume: { type: "STRING", description: "2 ou 3 phrases pour comprendre le match" },
-    forme_domicile: { type: "STRING", description: "1 phrase sur la forme récente de l'équipe qui reçoit" },
-    forme_exterieur: { type: "STRING", description: "1 phrase sur la forme récente de l'équipe qui se déplace" },
-    face_a_face: { type: "STRING", description: "1 ou 2 phrases sur les confrontations passées" },
     a_surveiller: { type: "ARRAY", items: { type: "STRING" }, description: "2 ou 3 points à surveiller pendant le match" },
     suspense: { type: "INTEGER", description: "Niveau de suspense de 1 (match déséquilibré) à 5 (très indécis)" },
     suspense_raison: { type: "STRING", description: "Pourquoi ce niveau de suspense, en 1 phrase" },
@@ -44,7 +43,7 @@ const RESPONSE_SCHEMA = {
       description: "2 mots de foot utilisés dans l'analyse, expliqués simplement",
     },
   },
-  required: ["enjeu", "resume", "forme_domicile", "forme_exterieur", "face_a_face", "a_surveiller", "suspense", "suspense_raison", "lexique"],
+  required: ["enjeu", "resume", "a_surveiller", "suspense", "suspense_raison", "lexique"],
 };
 
 // Analyses en cours de rédaction : si 20 visiteurs ouvrent le même match pendant que l'IA écrit,

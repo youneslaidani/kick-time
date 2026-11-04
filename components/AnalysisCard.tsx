@@ -1,8 +1,8 @@
 import { SUSPENSE_LABELS, type Analysis } from "@/lib/analysis";
-import type { Team } from "@/lib/types";
 
 // La carte vedette de la fiche match : l'analyse d'avant-match, à lire en quelques secondes.
-export default function AnalysisCard({ analysis, home, away, played }: { analysis: Analysis; home: Team; away: Team; played: boolean }) {
+// La forme et le face-à-face n'y sont pas répétés : ils sont affichés plus bas en graphiques, plus parlants.
+export default function AnalysisCard({ analysis, played }: { analysis: Analysis; played: boolean }) {
   const fromAi = analysis.source === "ia";
 
   return (
@@ -23,14 +23,6 @@ export default function AnalysisCard({ analysis, home, away, played }: { analysi
       <p className="mt-3 leading-relaxed text-text/85">{analysis.resume}</p>
 
       <SuspenseMeter level={analysis.suspense} reason={analysis.suspense_raison} />
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <MiniCard title={`Forme · ${home.shortName}`} text={analysis.forme_domicile} />
-        <MiniCard title={`Forme · ${away.shortName}`} text={analysis.forme_exterieur} />
-        <div className="sm:col-span-2">
-          <MiniCard title="Face-à-face" text={analysis.face_a_face} />
-        </div>
-      </div>
 
       <div className="mt-5">
         <h3 className="text-xs font-bold uppercase tracking-widest text-muted">À surveiller</h3>
@@ -85,14 +77,6 @@ function SuspenseMeter({ level, reason }: { level: number; reason: string }) {
   );
 }
 
-function MiniCard({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="h-full rounded-2xl border border-line bg-surface/60 p-4">
-      <h3 className="text-xs font-bold uppercase tracking-widest text-muted">{title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed">{text}</p>
-    </div>
-  );
-}
 
 // Affiché pendant que l'IA rédige (quelques secondes, seulement la première fois pour chaque match).
 export function AnalysisSkeleton() {
