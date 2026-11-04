@@ -1,4 +1,5 @@
 import { cacheLife } from "next/cache";
+import { connection } from "next/server";
 import { COMPETITIONS } from "./competitions";
 import { parisDate, shiftDate } from "./dates";
 import { demoMatchDay } from "./demo";
@@ -29,8 +30,8 @@ async function fetchMatchesOfDay(date: string): Promise<Match[]> {
   cacheLife("minutes");
 
   const codes = COMPETITIONS.map((c) => c.code).join(",");
-  // L'API raisonne en heure universelle : on demande la veille et le lendemain,
-  // puis on garde les matchs qui tombent ce jour-là à l'heure de Paris.
+  // L'API raisonne en heure universelle et exclut le jour « dateTo » (vérifié le 4/11) :
+  // on demande donc de la veille au lendemain, puis on garde les matchs de ce jour-là à l'heure de Paris.
   const data = await callApi<{ matches: Match[] }>(
     `/matches?competitions=${codes}&dateFrom=${shiftDate(date, -1)}&dateTo=${shiftDate(date, 1)}`,
   );
@@ -41,6 +42,9 @@ async function fetchMatchesOfDay(date: string): Promise<Match[]> {
 export async function getMatchDay(dayOffset: number): Promise<MatchDay> {
   if (shouldUseDemoData()) return demoMatchDay(dayOffset);
 
+  // On attend la vraie visite avant de lire l'heure : sinon Next.js figerait la date du jour
+  // au moment de la compilation et l'app afficherait toujours la même journée.
+  await connection();
   const date = shiftDate(parisDate(new Date()), dayOffset);
   try {
     return { date, matches: await fetchMatchesOfDay(date), source: "api", sample: false };

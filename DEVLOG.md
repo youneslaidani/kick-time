@@ -23,9 +23,18 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 - Design sombre et sportif (meilleur rendu au vidéoprojecteur).
 - Code rangé hors OneDrive (`C:\Users\youne\dev\kick-time`) pour éviter les problèmes de synchronisation.
 
+**Après avoir collé mes clés**
+- L'IA a testé l'API football-data.org avant d'écrire la suite : matchs, classements, face-à-face et derniers matchs d'une équipe fonctionnent en gratuit.
+- L'écran affiche maintenant les **vrais matchs** du jour (9 matchs de Ligue des champions le 4/11).
+
 **Problèmes rencontrés et solutions**
 - Pas de budget pour l'IA → offre gratuite de Gemini + cache (une seule analyse par match).
 - Le plan gratuit de football-data.org donne des scores légèrement différés → on l'assume et on l'explique.
+- Pendant les tests, on a dépassé la limite de 10 appels par minute (erreur 429) → preuve que le cache est indispensable pendant la démo, quand toute la salle ouvre l'app.
+- Le bilan « victoires / défaites » renvoyé par l'API pour le face-à-face est faux (tout à 0) → on le recalculera nous-mêmes à partir de la liste des matchs.
+- Ma première clé Gemini était refusée : j'avais copié le nom du projet Google au lieu de la clé (une vraie clé commence par `AIza`).
+- Next.js refusait de lire l'heure trop tôt (la date du jour aurait été figée) → on attend la visite de l'utilisateur avant de calculer « aujourd'hui ».
+- L'en-tête dépassait de l'écran sur les petits téléphones (320 px) → logo seul sur les très petits écrans.
 
 **Ce que j'ai appris** *(à compléter par moi)*
 -

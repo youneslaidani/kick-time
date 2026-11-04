@@ -19,6 +19,13 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Les chiffres (forme, face-à-face, écarts) sont **calculés par le code** dans `lib/stats.ts`. L'IA ne fait que les expliquer.
 - Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements).
 
+## Ce que donne l'API football-data.org gratuite (testé le 4/11/2026)
+- `/matches?competitions=…&dateFrom=…&dateTo=…` : `dateTo` est **exclu**. Pas de champ `minute`.
+- `/competitions/{code}/standings` : seulement le classement `TOTAL`, `form` vaut `null` → la forme se calcule nous-mêmes.
+- `/matches/{id}/head2head` : historique sur plusieurs saisons (depuis 2020), mais `aggregates` est faux (victoires à 0) → recompter à partir de `matches`. Liste vide si les équipes ne se sont jamais affrontées dans les compétitions couvertes.
+- `/teams/{id}/matches?status=FINISHED` : uniquement les compétitions couvertes, ordre chronologique.
+- Limite stricte de 10 appels/minute (erreur 429 au-delà) → toujours passer par le cache.
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - N'utiliser que les données fournies ; aucun nom de joueur.

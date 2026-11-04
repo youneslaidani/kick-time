@@ -7,7 +7,8 @@ export default function Header() {
       <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2" aria-label="Kick-Time, accueil">
           <Logo />
-          <span className="font-display text-2xl font-extrabold uppercase tracking-wide">
+          {/* sur les tout petits écrans, on ne garde que le logo pour laisser la place au menu */}
+          <span className="hidden font-display text-xl font-extrabold uppercase tracking-wide min-[360px]:inline sm:text-2xl">
             Kick<span className="text-accent">Time</span>
           </span>
         </Link>
