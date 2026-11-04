@@ -6,9 +6,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
+// « Mon équipe » n'apparaît dans le menu que sur grand écran (pas la place sur téléphone :
+// l'accueil affiche déjà une grande accroche vers le quiz).
 const LINKS = [
-  { href: "/", label: "Matchs" },
-  { href: "/classements", label: "Classements" },
+  { href: "/", label: "Matchs", wideOnly: false },
+  { href: "/classements", label: "Classements", wideOnly: false },
+  { href: "/mon-equipe", label: "Mon équipe", wideOnly: true },
 ];
 
 // L'adresse de la page n'est connue qu'au moment de la visite : on affiche d'abord les liens
@@ -36,9 +39,10 @@ function Links({ pathname }: { pathname: string | null }) {
           <Link
             key={link.href}
             href={link.href}
+            prefetch={link.wideOnly ? false : undefined}
             className={`rounded-full px-2.5 py-1.5 text-sm font-semibold transition-colors sm:px-3 ${
               active ? "bg-surface-2 text-text" : "text-muted hover:text-text"
-            }`}
+            } ${link.wideOnly ? "hidden sm:inline-block" : ""}`}
           >
             {link.label}
           </Link>

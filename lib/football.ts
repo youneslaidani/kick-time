@@ -2,8 +2,8 @@ import { cacheLife } from "next/cache";
 import { connection } from "next/server";
 import { COMPETITIONS } from "./competitions";
 import { parisDate, shiftDate } from "./dates";
-import { demoMatch, demoMatchDay } from "./demo";
-import type { Match, MatchDay, Scorer, StandingRow } from "./types";
+import { demoMatch, demoMatchDay, demoUpcomingMatches } from "./demo";
+import type { Match, MatchDay, Scorer, StandingRow, TeamInfo } from "./types";
 
 // Toutes les données de foot passent par ce fichier.
 // Le token reste sur le serveur : il n'est jamais envoyé au navigateur.
@@ -135,6 +135,23 @@ async function fetchScorers(code: string): Promise<Scorer[]> {
   return data.scorers;
 }
 
+// Les clubs d'un championnat avec leurs couleurs, leur stade et leur année de création (pour le quiz).
+// On ne garde que ces champs : l'API renvoie aussi tout l'effectif, inutile ici.
+async function fetchTeams(code: string): Promise<TeamInfo[]> {
+  "use cache: remote";
+  cacheLife("days");
+  const data = await callApi<{ teams: (TeamInfo & Record<string, unknown>)[] }>(`/competitions/${code}/teams`);
+  return data.teams.map(({ id, shortName, tla, crest, founded, clubColors, venue }) => ({
+    id,
+    shortName,
+    tla,
+    crest,
+    founded,
+    clubColors,
+    venue,
+  }));
+}
+
 // --- Fonctions utilisées par les pages ----------------------------------------------
 
 // dayOffset : -1 = hier, 0 = aujourd'hui, 1 = demain… de -DAYS_AROUND à +DAYS_AROUND.
@@ -171,6 +188,22 @@ export const getTeamSeason = (teamId: number) => safely(() => fetchTeamSeason(te
 export const getHeadToHead = (matchId: number) => safely(() => fetchHeadToHead(matchId));
 export const getStandings = (code: string) => safely(() => fetchStandings(code));
 export const getScorers = (code: string) => safely(() => fetchScorers(code));
+export const getTeams = (code: string) => safely(() => fetchTeams(code));
+
+// Les matchs pas encore commencés de la semaine (pour proposer « le prochain match de ton équipe »).
+export async function getUpcomingMatches(): Promise<Match[]> {
+  const upcoming = (m: Match, now: string) => (m.status === "SCHEDULED" || m.status === "TIMED") && m.utcDate > now;
+  if (shouldUseDemoData()) return demoUpcomingMatches();
+
+  const today = await todayInParis();
+  const now = new Date().toISOString();
+  try {
+    return (await fetchMatchWindow(today)).filter((m) => upcoming(m, now));
+  } catch (error) {
+    console.error(error);
+    return demoUpcomingMatches();
+  }
+}
 
 async function safely<T>(load: () => Promise<T>): Promise<T | null> {
   if (shouldUseDemoData()) return null;

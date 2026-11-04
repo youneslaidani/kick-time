@@ -17,7 +17,7 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Les clés API ne sortent jamais du serveur : jamais de `NEXT_PUBLIC_` pour une clé.
 - Toute donnée externe passe par `lib/football.ts` ; si l'API échoue ou si `DEMO_MODE=true`, on bascule sur `data/demo/`.
 - Les chiffres (forme, face-à-face, écarts) sont **calculés par le code** dans `lib/stats.ts`. L'IA ne fait que les expliquer.
-- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements), sauf ajout demandé par l'élève (ex. : barre de probabilités et joueur à surveiller, 4/11).
+- Pas de fonctionnalité hors MVP (3 écrans : Matchs, Fiche match, Classements), sauf ajout demandé par l'élève (4/11 : barre de probabilités, joueur à surveiller, match en 30 secondes, quiz « Trouve ton équipe »).
 
 ## Ce que donne l'API football-data.org gratuite (testé le 4/11/2026)
 - `/matches?competitions=…&dateFrom=…&dateTo=…` : `dateTo` est **exclu**. Pas de champ `minute`.
@@ -57,6 +57,12 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Commandes : clic à droite/gauche ou flèches, Échap pour fermer, bouton son. Sans voix française → lecture silencieuse avec sous-titres.
 - Pour l'oral : utiliser **Microsoft Edge** (voix « Natural » plus humaines que Hortense/Julie/Paul de Chrome) et tester le son de l'amphi avant.
 - La page prépare l'analyse et le joueur **une seule fois** (`loadAnalysis`, `loadFeaturedPlayer`) et les partage entre leurs blocs et le résumé.
+
+## « Trouve ton équipe en 20 secondes » (/mon-equipe)
+- Pour ceux qui ne suivent pas le foot : 5 questions sans vocabulaire de foot (ambition, couleur, pays, histoire/nouveauté, spectacle/tension).
+- `lib/quiz.ts` (questions, couleurs, score, raisons — testé) + `components/TeamQuiz.tsx` (quiz dans le navigateur, résultat avec confettis) + `app/mon-equipe/page.tsx` (données).
+- Données : `/competitions/{code}/teams` (couleurs, stade, création — cache 1 jour) + classements des 5 grands championnats + matchs de la semaine pour « son prochain match ». 11 appels à froid (~1 min) → à **préchauffer** avant l'oral.
+- Accroche en haut de l'accueil ; lien « Mon équipe » dans le menu sur grand écran seulement.
 
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.

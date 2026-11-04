@@ -25,6 +25,26 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export default function HomePage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6">
+      {/* L'accroche pour ceux qui ne suivent pas le foot : c'est la première chose qu'ils voient */}
+      <Link
+        href="/mon-equipe"
+        prefetch={false}
+        className="mb-6 flex items-center gap-4 rounded-3xl border border-accent/40 bg-linear-to-r from-accent/15 to-surface px-5 py-4 transition-colors hover:border-accent"
+      >
+        <span className="text-3xl" aria-hidden="true">
+          ✨
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-bold uppercase tracking-widest text-accent">Pas fan de foot ?</span>
+          <span className="block font-display text-xl font-extrabold uppercase leading-tight sm:text-2xl">
+            Trouve ton équipe en 20 secondes
+          </span>
+        </span>
+        <span className="text-2xl text-accent" aria-hidden="true">
+          →
+        </span>
+      </Link>
+
       {/* Suspense : le squelette s'affiche tout de suite, les matchs arrivent dès qu'ils sont chargés. */}
       <Suspense fallback={<MatchListSkeleton />}>
         <MatchesView searchParams={searchParams} />

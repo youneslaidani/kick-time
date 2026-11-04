@@ -60,6 +60,17 @@ export type StandingRow = {
   goalDifference: number;
 };
 
+// Les infos d'un club utiles au quiz « Trouve ton équipe ».
+export type TeamInfo = {
+  id: number;
+  shortName: string;
+  tla: string;
+  crest: string;
+  founded: number | null;
+  clubColors: string | null; // en anglais, ex. « Red / Yellow »
+  venue: string | null;
+};
+
 // Un buteur, tel que renvoyé par /competitions/{code}/scorers.
 export type Scorer = {
   player: {

@@ -199,6 +199,31 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — séduire quelqu'un qui ne s'intéresse pas au foot
+
+**Ce que j'ai demandé**
+- Quelque chose qui touche les personnes qui ne suivent pas le foot.
+
+**Ce qu'on a décidé ensemble**
+- Viser **les non-fans de foot** (c'est la cible même de Kick-Time), sans clichés sur un public en particulier.
+- Idée retenue : **« Trouve ton équipe en 20 secondes »**. On ne connaît rien au foot ? En 5 questions de la vie de tous les jours (ta couleur préférée, ta ville de week-end rêvée, plutôt histoire ou nouveauté…), l'app te trouve **ton** club et te donne une raison de regarder son prochain match.
+- Pendant l'oral : « Sortez votre téléphone : dans 20 secondes, vous avez une équipe à supporter ce week-end. »
+
+**Comment ça marche**
+- Le code compare les réponses aux **vraies infos des ~100 clubs** des 5 grands championnats : couleurs du maillot, pays, place au classement, année de création, nombre de buts par match. Un score par club, le plus haut gagne (testé : le violet mène à Toulouse, Madrid + favoris au Real).
+- Le résultat explique **pourquoi** (« Ses couleurs : rouge et jaune. Avec ton rouge préféré ! », « Un club chargé d'histoire, fondé en 1906 »), avec des confettis aux couleurs du club, puis **son prochain match** avec un lien vers l'analyse IA.
+- Les réponses ne quittent pas le téléphone : le choix est calculé dans le navigateur.
+- Une grande accroche « Pas fan de foot ? » en haut de l'accueil.
+
+**Exemple réel** : outsider + rouge + France + histoire + spectacle → **RC Lens** (9e de Ligue 1, fondé en 1906, Stade Bollaert-Delelis), prochain match : Lens – Côme ce soir à 21 h.
+
+**Tests automatiques** : 55.
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

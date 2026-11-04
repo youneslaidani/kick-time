@@ -19,6 +19,10 @@ export function demoMatchDay(dayOffset: number): MatchDay {
   };
 }
 
+export function demoUpcomingMatches(): Match[] {
+  return demo.matches.filter((m) => m.status === "SCHEDULED" || m.status === "TIMED");
+}
+
 export function demoMatch(id: number): Match | null {
   return demo.matches.find((m) => m.id === id) ?? null;
 }
