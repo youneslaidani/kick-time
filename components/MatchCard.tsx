@@ -59,9 +59,9 @@ export default function MatchCard({ match }: { match: Match }) {
       {/* Les buteurs (matchs du jour), sous leur équipe : une 2e ligne dans la même grille */}
       {goals.length > 0 && (
         <>
-          <GoalList goals={goals} side="home" compact className="text-center text-[11px] sm:text-right" />
+          <GoalList goals={goals} side="home" variant="card" className="text-center text-[11px] sm:text-right" />
           <span aria-hidden="true" />
-          <GoalList goals={goals} side="away" compact className="text-center text-[11px] sm:text-left" />
+          <GoalList goals={goals} side="away" variant="card" className="text-center text-[11px] sm:text-left" />
         </>
       )}
     </Link>

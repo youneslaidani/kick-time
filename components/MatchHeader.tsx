@@ -11,6 +11,7 @@ export default function MatchHeader({ match }: { match: Match }) {
   const live = isLive(match.status);
   const showScore = live || isFinished(match.status);
   const { home, away } = match.score.fullTime;
+  const goals = match.live?.goals ?? [];
 
   return (
     <section
@@ -25,7 +26,7 @@ export default function MatchHeader({ match }: { match: Match }) {
       </p>
 
       <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
-        <TeamBlock team={match.homeTeam} venue="Domicile" goals={<GoalList goals={match.live?.goals ?? []} side="home" className="text-sm" />} />
+        <TeamBlock team={match.homeTeam} venue="Domicile" />
 
         <div className="flex min-w-24 flex-col items-center gap-2 pt-3">
           {showScore ? (
@@ -48,19 +49,26 @@ export default function MatchHeader({ match }: { match: Match }) {
           )}
         </div>
 
-        <TeamBlock team={match.awayTeam} venue="Extérieur" goals={<GoalList goals={match.live?.goals ?? []} side="away" className="text-sm" />} />
+        <TeamBlock team={match.awayTeam} venue="Extérieur" />
       </div>
+
+      {/* Les buteurs sur une ligne à part : chaque équipe a la moitié de la largeur (un tiers était trop étroit sur téléphone) */}
+      {goals.length > 0 && (
+        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line/60 pt-3">
+          <GoalList goals={goals} side="home" variant="header" className="text-center text-sm" />
+          <GoalList goals={goals} side="away" variant="header" className="text-center text-sm" />
+        </div>
+      )}
     </section>
   );
 }
 
-function TeamBlock({ team, venue, goals }: { team: Team; venue: string; goals: React.ReactNode }) {
+function TeamBlock({ team, venue }: { team: Team; venue: string }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2 text-center">
       <TeamCrest src={team.crest} alt={team.name} fallback={team.tla} size={80} />
       <p className="w-full font-display text-xl font-bold uppercase leading-tight sm:text-2xl lg:text-3xl">{team.shortName}</p>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{venue}</p>
-      {goals}
     </div>
   );
 }
