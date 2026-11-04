@@ -51,6 +51,13 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - Photo : API de Wikipédia (`lib/player-photo.ts`), images libres de Wikimedia Commons, crédit affiché sous la carte. On vérifie que la page décrit un footballeur né la même année (le 1er résultat peut être un homonyme : Mark au lieu de Jude Bellingham). Sans photo → initiales.
 - L'IA ne parle toujours d'aucun joueur : la phrase de la carte est écrite par le code.
 
+## « Le match en 30 secondes » (effet waouh de la démo)
+- Bouton sous l'en-tête de la fiche match → résumé plein écran animé, lu à voix haute par la **synthèse vocale du navigateur** (Web Speech API : gratuite, hors ligne, aucun appel IA en plus).
+- `lib/story.ts` (contenu et phrases, testé) + `components/MatchStory.tsx` (lecteur). Slides : affiche, enjeu (IA), favori, forme, joueur, suspense, conclusion ; une slide sans données est sautée.
+- Commandes : clic à droite/gauche ou flèches, Échap pour fermer, bouton son. Sans voix française → lecture silencieuse avec sous-titres.
+- Pour l'oral : utiliser **Microsoft Edge** (voix « Natural » plus humaines que Hortense/Julie/Paul de Chrome) et tester le son de l'amphi avant.
+- La page prépare l'analyse et le joueur **une seule fois** (`loadAnalysis`, `loadFeaturedPlayer`) et les partage entre leurs blocs et le résumé.
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).

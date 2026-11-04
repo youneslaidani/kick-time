@@ -5,18 +5,22 @@ import AnalysisCard, { AnalysisSkeleton } from "@/components/AnalysisCard";
 import FormRow from "@/components/FormRow";
 import HeadToHeadCard from "@/components/HeadToHeadCard";
 import MatchHeader from "@/components/MatchHeader";
+import MatchStory from "@/components/MatchStory";
 import PlayerToWatch from "@/components/PlayerToWatch";
 import Section, { Unavailable } from "@/components/Section";
 import StandingsCompare from "@/components/StandingsCompare";
 import WinProbabilityBar from "@/components/WinProbabilityBar";
 import { getAnalysis } from "@/lib/ai";
-import { buildFacts } from "@/lib/analysis";
+import { buildFacts, SUSPENSE_LABELS, type Analysis } from "@/lib/analysis";
+import { competitionLabel } from "@/lib/competitions";
+import { formatSpokenKickoff } from "@/lib/dates";
 import { getHeadToHead, getMatch, getScorers, getStandings, getTeamSeason } from "@/lib/football";
-import { getPlayerPhoto } from "@/lib/player-photo";
+import { getPlayerPhoto, type PlayerPhoto } from "@/lib/player-photo";
 import { playerToWatch } from "@/lib/players";
 import { probabilitiesFor } from "@/lib/probabilities";
 import { headToHead, recentForm, venueRecord } from "@/lib/stats";
-import type { Match, StandingRow } from "@/lib/types";
+import type { StoryData } from "@/lib/story";
+import type { Match, Scorer, StandingRow } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
 type Loading<T> = Promise<T | null>; // une donnée en cours de chargement (null = indisponible)
@@ -49,21 +53,28 @@ async function MatchView({ params }: { params: Params }) {
   const awaySeason = getTeamSeason(match.awayTeam.id);
   const pastMeetings = getHeadToHead(match.id);
   const table = getStandings(match.competition.code);
+  // L'analyse IA et le joueur servent à deux endroits (leur bloc + le résumé animé) : on ne les prépare qu'une fois.
+  const analysis = loadAnalysis(match, homeSeason, awaySeason, pastMeetings, table);
+  const featured = loadFeaturedPlayer(match);
 
   return (
     <div className="flex flex-col gap-4">
       <MatchHeader match={match} />
+
+      <Suspense fallback={<StoryPlaceholder />}>
+        <StoryBlock match={match} analysis={analysis} featured={featured} homeSeason={homeSeason} awaySeason={awaySeason} />
+      </Suspense>
 
       <Suspense fallback={<div className="h-36 animate-pulse rounded-3xl bg-surface" />}>
         <ProbabilityBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} />
       </Suspense>
 
       <Suspense fallback={<AnalysisSkeleton />}>
-        <AnalysisBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} pastMeetings={pastMeetings} table={table} />
+        <AnalysisBlock match={match} analysis={analysis} />
       </Suspense>
 
       <Suspense fallback={<div className="h-56 animate-pulse rounded-3xl bg-surface" />}>
-        <PlayerBlock match={match} />
+        <PlayerBlock match={match} featured={featured} />
       </Suspense>
 
       <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
@@ -87,13 +98,92 @@ async function MatchView({ params }: { params: Params }) {
   );
 }
 
-// Le meilleur buteur des deux équipes, avec sa photo Wikipédia (rien ne s'affiche si personne n'a marqué).
-async function PlayerBlock({ match }: { match: Match }) {
+type Featured = { scorer: Scorer; photo: PlayerPhoto | null };
+
+// Le meilleur buteur des deux équipes, avec sa photo Wikipédia (null si personne n'a marqué).
+async function loadFeaturedPlayer(match: Match): Promise<Featured | null> {
   const scorers = await getScorers(match.competition.code);
   const scorer = scorers && playerToWatch(scorers, match);
   if (!scorer) return null;
-  const photo = await getPlayerPhoto(scorer.player.name, scorer.player.dateOfBirth);
-  return <PlayerToWatch scorer={scorer} photo={photo} match={match} />;
+  return { scorer, photo: await getPlayerPhoto(scorer.player.name, scorer.player.dateOfBirth) };
+}
+
+// L'analyse IA attend les mêmes données que les blocs du dessous, puis les fait expliquer par Gemini.
+async function loadAnalysis(
+  match: Match,
+  homeSeason: Loading<Match[]>,
+  awaySeason: Loading<Match[]>,
+  pastMeetings: Loading<Match[]>,
+  table: Loading<StandingRow[]>,
+): Promise<Analysis | null> {
+  const [home, away, meetings, rows] = await Promise.all([homeSeason, awaySeason, pastMeetings, table]);
+  // Sans aucun chiffre (mode démo, API en panne), l'IA n'aurait rien de vrai à raconter : on n'affiche rien.
+  if (!home && !away && !rows) return null;
+
+  const probabilities = probabilitiesFor(match, home, away);
+  const facts = buildFacts(match, { homeSeason: home, awaySeason: away, meetings, table: rows, probabilities });
+  return getAnalysis(facts);
+}
+
+async function PlayerBlock({ match, featured }: { match: Match; featured: Loading<Featured> }) {
+  const player = await featured;
+  if (!player) return null;
+  return <PlayerToWatch scorer={player.scorer} photo={player.photo} match={match} />;
+}
+
+// « Le match en 30 secondes » : on rassemble ce que les autres blocs affichent déjà, sans aucun appel en plus.
+async function StoryBlock({
+  match,
+  analysis,
+  featured,
+  homeSeason,
+  awaySeason,
+}: {
+  match: Match;
+  analysis: Loading<Analysis>;
+  featured: Loading<Featured>;
+  homeSeason: Loading<Match[]>;
+  awaySeason: Loading<Match[]>;
+}) {
+  const [text, player, home, away] = await Promise.all([analysis, featured, homeSeason, awaySeason]);
+  if (!text) return null;
+
+  const probabilities = probabilitiesFor(match, home, away);
+  const homeForm = home ? recentForm(home, match.homeTeam.id, match.utcDate) : [];
+  const awayForm = away ? recentForm(away, match.awayTeam.id, match.utcDate) : [];
+  const team = (t: Match["homeTeam"]) => ({ name: t.shortName, crest: t.crest, tla: t.tla });
+
+  const data: StoryData = {
+    home: team(match.homeTeam),
+    away: team(match.awayTeam),
+    competition: `${competitionLabel(match.competition.code)}${match.matchday ? `, journée ${match.matchday}` : ""}`,
+    when: formatSpokenKickoff(match.utcDate),
+    enjeu: text.enjeu,
+    probabilities: probabilities && { home: probabilities.home, draw: probabilities.draw, away: probabilities.away },
+    form:
+      homeForm.length > 0 && awayForm.length > 0
+        ? { home: homeForm.map((e) => e.result), away: awayForm.map((e) => e.result) }
+        : null,
+    player: player && {
+      name: player.scorer.player.name,
+      photo: player.photo?.url ?? null,
+      goals: player.scorer.goals,
+      played: player.scorer.playedMatches,
+      crest: player.scorer.team.crest,
+      tla: player.scorer.team.tla,
+    },
+    suspense: { level: text.suspense, label: SUSPENSE_LABELS[text.suspense], reason: text.suspense_raison },
+  };
+  return <MatchStory data={data} />;
+}
+
+function StoryPlaceholder() {
+  return (
+    <div className="flex animate-pulse items-center gap-4 rounded-3xl border border-accent/30 bg-accent/10 px-5 py-4">
+      <span className="size-12 rounded-full bg-accent/30" />
+      <span className="font-display text-xl font-bold uppercase text-accent">Préparation du résumé animé…</span>
+    </div>
+  );
 }
 
 async function FormBlock({ match, homeSeason, awaySeason }: { match: Match; homeSeason: Loading<Match[]>; awaySeason: Loading<Match[]> }) {
@@ -146,29 +236,11 @@ async function ProbabilityBlock({ match, homeSeason, awaySeason }: { match: Matc
   return <WinProbabilityBar probabilities={probabilities} home={match.homeTeam} away={match.awayTeam} />;
 }
 
-// L'analyse IA attend les mêmes données que les blocs du dessous, puis les fait expliquer par Gemini.
-async function AnalysisBlock({
-  match,
-  homeSeason,
-  awaySeason,
-  pastMeetings,
-  table,
-}: {
-  match: Match;
-  homeSeason: Loading<Match[]>;
-  awaySeason: Loading<Match[]>;
-  pastMeetings: Loading<Match[]>;
-  table: Loading<StandingRow[]>;
-}) {
-  const [home, away, meetings, rows] = await Promise.all([homeSeason, awaySeason, pastMeetings, table]);
-  // Sans aucun chiffre (mode démo, API en panne), l'IA n'aurait rien de vrai à raconter : on n'affiche rien.
-  if (!home && !away && !rows) return null;
-
-  const probabilities = probabilitiesFor(match, home, away);
-  const facts = buildFacts(match, { homeSeason: home, awaySeason: away, meetings, table: rows, probabilities });
-  const analysis = await getAnalysis(facts);
+async function AnalysisBlock({ match, analysis }: { match: Match; analysis: Loading<Analysis> }) {
+  const text = await analysis;
+  if (!text) return null;
   const played = match.status !== "SCHEDULED" && match.status !== "TIMED";
-  return <AnalysisCard analysis={analysis} home={match.homeTeam} away={match.awayTeam} played={played} />;
+  return <AnalysisCard analysis={text} home={match.homeTeam} away={match.awayTeam} played={played} />;
 }
 
 function BlockSkeleton() {

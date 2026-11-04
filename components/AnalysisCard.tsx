@@ -1,7 +1,5 @@
-import type { Analysis } from "@/lib/analysis";
+import { SUSPENSE_LABELS, type Analysis } from "@/lib/analysis";
 import type { Team } from "@/lib/types";
-
-const SUSPENSE_LABELS = ["", "Match déséquilibré", "Plutôt à sens unique", "Incertain", "Très indécis", "Suspense maximal"];
 
 // La carte vedette de la fiche match : l'analyse d'avant-match, à lire en quelques secondes.
 export default function AnalysisCard({ analysis, home, away, played }: { analysis: Analysis; home: Team; away: Team; played: boolean }) {

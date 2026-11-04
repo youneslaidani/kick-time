@@ -176,6 +176,29 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — « Surprends-moi » : le match en 30 secondes
+
+**Ce que j'ai demandé**
+- Une fonctionnalité qui me surprenne et qui surprenne le jury.
+
+**Ce que l'IA a proposé et construit**
+- Un bouton **« Le match en 30 secondes »** sur chaque fiche : un résumé plein écran, **animé et commenté à voix haute**, comme une mini-émission de télé. Affiche → enjeu (écrit par l'IA) → qui part favori (barre qui se remplit) → forme (pastilles qui apparaissent) → joueur à surveiller (photo qui zoome, compteur de buts) → jauge de suspense → conclusion.
+- La voix est celle du **navigateur** (synthèse vocale intégrée) : gratuite, sans internet, **aucun appel d'IA en plus** (important avec le quota de 20/jour).
+- Sous-titres, son coupable, navigation au clavier ou au toucher (comme les stories).
+
+**Problèmes rencontrés et solutions**
+- Le premier essai durait environ 1 minute : les phrases de l'IA sur la forme étaient trop longues à l'oral → phrase courte calculée par le code (« Sur leurs 5 derniers matchs, Valencia compte 1 victoire, Real Madrid 5 victoires »).
+- « Samedi 7 Novembre À 21 H » : une majuscule à chaque mot → seulement la première lettre.
+- La photo agrandie chevauchait le titre ; sur téléphone, les noms étaient coupés dans la slide de forme → corrigé.
+- Sur iPhone, la voix n'est autorisée qu'au moment précis du clic → on la « réveille » dans le clic.
+
+**Tests automatiques** : 48.
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

@@ -17,6 +17,47 @@
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-barlow);
+
+  /* Animations du « match en 30 secondes » (utilisables avec animate-story-in, animate-story-pop…) */
+  --animate-story-in: story-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-story-pop: story-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-story-zoom: story-zoom 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-story-grow: story-grow 0.6s ease-out both;
+  --animate-story-progress: story-progress linear both;
+  --animate-story-glow: story-glow 14s ease-in-out infinite;
+
+  @keyframes story-in {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes story-pop {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes story-zoom {
+    from { opacity: 0; transform: scale(1.25); filter: blur(6px); }
+    to { opacity: 1; transform: scale(1); filter: none; }
+  }
+  @keyframes story-grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes story-progress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+  @keyframes story-glow {
+    0%, 100% { transform: translate(-15%, -10%) scale(1); }
+    50% { transform: translate(15%, 10%) scale(1.25); }
+  }
+}
+
+/* Si l'utilisateur a demandé moins d'animations à son système, on les coupe. */
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-story"] {
+    animation: none !important;
+  }
 }
 
 :root {

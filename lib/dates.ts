@@ -47,6 +47,13 @@ export function formatShortDate(utcDate: string): string {
   }).format(new Date(utcDate));
 }
 
+// « samedi 7 novembre à 21 h » ou « … à 20 h 45 » : la forme qu'on dit à voix haute.
+export function formatSpokenKickoff(utcDate: string): string {
+  const [hours, minutes] = formatKickoff(utcDate).split(":");
+  const time = minutes === "00" ? `${Number(hours)} h` : `${Number(hours)} h ${minutes}`;
+  return `${formatLongDate(parisDate(new Date(utcDate)))} à ${time}`;
+}
+
 // « 21:00 »
 export function formatKickoff(utcDate: string): string {
   return new Intl.DateTimeFormat("fr-FR", {

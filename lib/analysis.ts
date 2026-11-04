@@ -138,6 +138,9 @@ export type AnalysisContent = {
   lexique: { mot: string; definition: string }[];
 };
 
+// Le nom de chaque niveau de la jauge de suspense (de 1 à 5).
+export const SUSPENSE_LABELS = ["", "Match déséquilibré", "Plutôt à sens unique", "Incertain", "Très indécis", "Suspense maximal"];
+
 export type Analysis = AnalysisContent & {
   source: "ia" | "secours"; // « secours » = analyse simplifiée écrite par le code
   model?: string;

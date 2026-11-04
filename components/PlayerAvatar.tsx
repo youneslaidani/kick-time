@@ -4,7 +4,16 @@
 // on affiche les initiales du joueur à la place.
 import { useState } from "react";
 
-export default function PlayerAvatar({ src, name }: { src: string | null; name: string }) {
+// sizeClass : la taille (petite sur la carte, très grande dans le résumé animé).
+export default function PlayerAvatar({
+  src,
+  name,
+  sizeClass = "size-24 text-4xl sm:size-28",
+}: {
+  src: string | null;
+  name: string;
+  sizeClass?: string;
+}) {
   const [broken, setBroken] = useState(!src);
   const initials = name
     .split(" ")
@@ -16,7 +25,7 @@ export default function PlayerAvatar({ src, name }: { src: string | null; name: 
   if (broken || !src) {
     return (
       <span
-        className="grid size-24 place-items-center rounded-2xl bg-surface-2 font-display text-4xl font-extrabold text-muted sm:size-28"
+        className={`grid place-items-center rounded-2xl bg-surface-2 font-display font-extrabold text-muted ${sizeClass}`}
         aria-label={name}
       >
         {initials}
@@ -32,7 +41,7 @@ export default function PlayerAvatar({ src, name }: { src: string | null; name: 
       alt={`Photo de ${name}`}
       loading="lazy"
       onError={() => setBroken(true)}
-      className="size-24 rounded-2xl bg-surface-2 object-cover object-top sm:size-28"
+      className={`rounded-2xl bg-surface-2 object-cover object-top ${sizeClass}`}
     />
   );
 }
