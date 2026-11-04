@@ -9,7 +9,7 @@ export default function Footer() {
           <span className="font-display text-sm font-extrabold uppercase text-text">
             Kick<span className="text-accent">Time</span>
           </span>{" "}
-          · Données : football-data.org · Analyses : Google Gemini · Photos : Wikimedia Commons
+          · Données : football-data.org · Direct : ESPN · Analyses : Google Gemini · Photos : Wikimedia Commons
         </p>
         <Link href="/qr" className="font-semibold text-text hover:text-accent">
           📱 Partager l&apos;app (QR code)

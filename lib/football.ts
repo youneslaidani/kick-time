@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { COMPETITIONS } from "./competitions";
 import { parisDate, shiftDate } from "./dates";
 import { demoMatch, demoMatchDay, demoUpcomingMatches } from "./demo";
+import { withLiveScores } from "./live";
 import type { Match, MatchDay, Scorer, StandingRow, TeamInfo } from "./types";
 
 // Toutes les données de foot passent par ce fichier.
@@ -71,6 +72,11 @@ async function sendRequest<T>(path: string, retry = true): Promise<T> {
 async function todayInParis(): Promise<string> {
   await connection();
   return parisDate(new Date());
+}
+
+// Le match a-t-il lieu aujourd'hui (heure de Paris) ?
+export async function isToday(utcDate: string): Promise<boolean> {
+  return parisDate(new Date(utcDate)) === (await todayInParis());
 }
 
 // --- Appels mis en cache -------------------------------------------------------------
@@ -162,7 +168,8 @@ export async function getMatchDay(dayOffset: number): Promise<MatchDay> {
   const date = shiftDate(today, dayOffset);
   try {
     const matches = (await fetchMatchWindow(today)).filter((m) => parisDate(new Date(m.utcDate)) === date);
-    return { date, matches, source: "api", sample: false };
+    // Aujourd'hui seulement : on complète avec le direct (score à jour, minute, buteurs).
+    return { date, matches: dayOffset === 0 ? await withLiveScores(matches, date) : matches, source: "api", sample: false };
   } catch (error) {
     // L'API est en panne ou la limite est atteinte : on bascule sur les données de secours.
     console.error(error);
@@ -174,9 +181,12 @@ export async function getMatch(id: number): Promise<Match | null> {
   if (shouldUseDemoData()) return demoMatch(id);
 
   try {
-    // Le plus souvent, le match est déjà dans la fenêtre d'hier à demain : pas d'appel en plus.
-    const fromWindow = (await fetchMatchWindow(await todayInParis())).find((m) => m.id === id);
-    return fromWindow ?? (await fetchMatch(id));
+    // Le plus souvent, le match est déjà dans la fenêtre de la semaine : pas d'appel en plus.
+    const today = await todayInParis();
+    const match = (await fetchMatchWindow(today)).find((m) => m.id === id) ?? (await fetchMatch(id));
+    // Match du jour : on complète avec le direct (score à jour, minute, buteurs).
+    if (parisDate(new Date(match.utcDate)) === today) return (await withLiveScores([match], today))[0];
+    return match;
   } catch (error) {
     console.error(error);
     return demoMatch(id);

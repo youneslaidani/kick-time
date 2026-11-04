@@ -44,6 +44,8 @@ export type Match = {
   homeTeam: Team;
   awayTeam: Team;
   score: Score;
+  // Ajouté par lib/live.ts pour les matchs du jour : minute de jeu et buteurs (absent sinon).
+  live?: { clock: string | null; goals: { minute: string; scorer: string; scorerShort: string; side: "home" | "away"; penalty: boolean; ownGoal: boolean }[] };
 };
 
 // Une ligne du classement d'un championnat.

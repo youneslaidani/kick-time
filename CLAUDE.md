@@ -33,6 +33,11 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - JSON fiable avec `generationConfig.responseMimeType: "application/json"` + `responseSchema`.
 - `thinkingConfig.thinkingLevel: "low"` : ~6 s au lieu de ~11 s, mais une faute d'orthographe observée → à trancher au J4 (le cache rend la latence moins critique).
 
+## Direct (score, minute, buteurs)
+- football-data.org gratuit = scores en différé (0-0 affiché alors qu'un but avait été marqué, 4/11) et aucun buteur.
+- `lib/live.ts` complète les matchs **du jour** avec l'API publique d'ESPN (`site.api.espn.com/.../scoreboard`, sans clé, non officielle) : score, minute, buteurs (nom complet + nom court). Cache 20 s. Correspondance des matchs par heure de coup d'envoi (±15 min) + ressemblance des noms (testé : PAE AEK/AEK Athens, Man City, Barça, PSG). Si ESPN ne répond pas → données football-data telles quelles.
+- `components/AutoRefresh.tsx` : `router.refresh()` toutes les 30 s pendant un match (60 s s'il reste des matchs du jour à jouer), en pause pendant « Le match en 30 secondes » et quand l'onglet est caché.
+
 ## Analyse IA (fiche match)
 - `lib/analysis.ts` : `buildFacts` (chiffres envoyés à l'IA, testés), `parseAnalysis` (vérifie le JSON), `simpleAnalysis` (version sans IA si Gemini est en panne).
 - `lib/ai.ts` : prompt, schéma JSON, modèles essayés dans l'ordre (`gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-flash-latest`), 35 s max par modèle, cache partagé 12 h (clé = les chiffres).

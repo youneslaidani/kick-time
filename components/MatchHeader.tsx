@@ -1,7 +1,8 @@
 import { competitionLabel } from "@/lib/competitions";
 import { formatKickoff, formatLongDate, parisDate } from "@/lib/dates";
-import { isFinished, isLive, statusLabel } from "@/lib/match-status";
+import { isFinished, isLive, liveLabel, statusLabel } from "@/lib/match-status";
 import type { Match, Team } from "@/lib/types";
+import GoalList from "./GoalList";
 import LiveBadge from "./LiveBadge";
 import TeamCrest from "./TeamCrest";
 
@@ -24,7 +25,7 @@ export default function MatchHeader({ match }: { match: Match }) {
       </p>
 
       <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
-        <TeamBlock team={match.homeTeam} venue="Domicile" />
+        <TeamBlock team={match.homeTeam} venue="Domicile" goals={<GoalList goals={match.live?.goals ?? []} side="home" className="text-sm" />} />
 
         <div className="flex min-w-24 flex-col items-center gap-2 pt-3">
           {showScore ? (
@@ -39,7 +40,7 @@ export default function MatchHeader({ match }: { match: Match }) {
             </span>
           )}
           {live ? (
-            <LiveBadge label={statusLabel(match.status) ?? "Live"} />
+            <LiveBadge label={liveLabel(match)} />
           ) : (
             <span className="text-xs font-semibold uppercase tracking-wider text-muted">
               {statusLabel(match.status) ?? "À venir"}
@@ -47,18 +48,19 @@ export default function MatchHeader({ match }: { match: Match }) {
           )}
         </div>
 
-        <TeamBlock team={match.awayTeam} venue="Extérieur" />
+        <TeamBlock team={match.awayTeam} venue="Extérieur" goals={<GoalList goals={match.live?.goals ?? []} side="away" className="text-sm" />} />
       </div>
     </section>
   );
 }
 
-function TeamBlock({ team, venue }: { team: Team; venue: string }) {
+function TeamBlock({ team, venue, goals }: { team: Team; venue: string; goals: React.ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2 text-center">
       <TeamCrest src={team.crest} alt={team.name} fallback={team.tla} size={80} />
       <p className="w-full font-display text-xl font-bold uppercase leading-tight sm:text-2xl lg:text-3xl">{team.shortName}</p>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{venue}</p>
+      {goals}
     </div>
   );
 }

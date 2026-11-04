@@ -1,4 +1,10 @@
-import type { MatchStatus } from "./types";
+import type { Match, MatchStatus } from "./types";
+
+// Ce qu'affiche le badge rouge d'un match en cours : la minute de jeu si on la connaît (« 67' »).
+export function liveLabel(match: Match): string {
+  if (match.status === "PAUSED") return "Mi-temps";
+  return match.live?.clock ?? "En direct";
+}
 
 export function isLive(status: MatchStatus): boolean {
   return status === "IN_PLAY" || status === "PAUSED" || status === "LIVE";

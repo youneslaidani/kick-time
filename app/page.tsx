@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import AutoRefresh from "@/components/AutoRefresh";
 import FilterChip from "@/components/FilterChip";
 import MatchCard from "@/components/MatchCard";
 import TeamCrest from "@/components/TeamCrest";
 import { competitionLabel, competitionRank } from "@/lib/competitions";
 import { formatDayNumber, formatLongDate, formatWeekdayShort, shiftDate } from "@/lib/dates";
 import { DAYS_AROUND, getMatchDay } from "@/lib/football";
-import { isLive } from "@/lib/match-status";
+import { isFinished, isLive } from "@/lib/match-status";
 import type { Match } from "@/lib/types";
 
 // Les 7 jours proposés, de J-3 à J+3. Le jour choisi est écrit dans l'adresse :
@@ -83,6 +84,8 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
   const leagues = groupByCompetition(matches);
   const visible = league ? leagues.filter((g) => g.code === league) : leagues;
   const liveCount = matches.filter((m) => isLive(m.status)).length;
+  // Aujourd'hui, tant qu'il reste des matchs à jouer : mise à jour automatique (30 s pendant les matchs, sinon 1 min).
+  const stillToPlay = matches.some((m) => !isFinished(m.status) && m.status !== "POSTPONED" && m.status !== "CANCELLED");
 
   return (
     <>
@@ -149,7 +152,8 @@ async function MatchesView({ searchParams }: { searchParams: SearchParams }) {
         </div>
       )}
 
-      <SourceNote source={source} sample={sample} />
+      {offset === 0 && stillToPlay && <AutoRefresh seconds={liveCount > 0 ? 30 : 60} />}
+      <SourceNote source={source} sample={sample} live={matches.some((m) => m.live)} />
     </>
   );
 }
@@ -187,8 +191,10 @@ function EmptyState() {
 }
 
 // Transparence : on dit toujours d'où viennent les données affichées.
-function SourceNote({ source, sample }: { source: "api" | "demo"; sample: boolean }) {
-  let text = "Données football-data.org · rafraîchies chaque minute";
+function SourceNote({ source, sample, live }: { source: "api" | "demo"; sample: boolean; live: boolean }) {
+  let text = live
+    ? "Données football-data.org · direct ESPN (score, minute, buteurs) · mise à jour automatique"
+    : "Données football-data.org · rafraîchies chaque minute";
   if (source === "demo") text = sample ? "Données d'exemple (aucune clé API configurée)" : "Mode démo : données enregistrées";
 
   return (

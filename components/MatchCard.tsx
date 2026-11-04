@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { formatKickoff } from "@/lib/dates";
-import { isFinished, isLive, statusLabel } from "@/lib/match-status";
+import { isFinished, isLive, liveLabel, statusLabel } from "@/lib/match-status";
 import type { Match, Team } from "@/lib/types";
+import GoalList from "./GoalList";
 import LiveBadge from "./LiveBadge";
 import TeamCrest from "./TeamCrest";
 
@@ -12,6 +13,7 @@ export default function MatchCard({ match }: { match: Match }) {
   const showScore = live || finished;
   const { home, away } = match.score.fullTime;
   const winner = match.score.winner;
+  const goals = match.live?.goals ?? [];
 
   return (
     // prefetch={false} : sans ça, Next.js préchargerait toutes les fiches visibles
@@ -19,7 +21,7 @@ export default function MatchCard({ match }: { match: Match }) {
     <Link
       href={`/match/${match.id}`}
       prefetch={false}
-      className={`grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border px-3 py-3.5 transition-colors sm:px-5 ${
+      className={`grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-2 rounded-2xl border px-3 py-3.5 transition-colors sm:px-5 ${
         live ? "border-live/40 bg-live/[0.06] hover:border-live/70" : "border-line bg-surface hover:border-accent/40"
       }`}
     >
@@ -42,7 +44,7 @@ export default function MatchCard({ match }: { match: Match }) {
           </span>
         )}
         {live ? (
-          <LiveBadge label={statusLabel(match.status) ?? "Live"} />
+          <LiveBadge label={liveLabel(match)} />
         ) : (
           statusLabel(match.status) && (
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
@@ -53,6 +55,15 @@ export default function MatchCard({ match }: { match: Match }) {
       </div>
 
       <TeamSide team={match.awayTeam} side="away" dimmed={winner === "HOME_TEAM"} />
+
+      {/* Les buteurs (matchs du jour), sous leur équipe : une 2e ligne dans la même grille */}
+      {goals.length > 0 && (
+        <>
+          <GoalList goals={goals} side="home" compact className="text-center text-[11px] sm:text-right" />
+          <span aria-hidden="true" />
+          <GoalList goals={goals} side="away" compact className="text-center text-[11px] sm:text-left" />
+        </>
+      )}
     </Link>
   );
 }

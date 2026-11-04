@@ -304,6 +304,24 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — le score ne se mettait pas à jour pendant AEK – Real Madrid
+
+**Ce que j'ai remarqué** : un but avait été marqué, mais l'app affichait toujours 0-0.
+
+**L'enquête** : l'IA a interrogé directement l'API football-data.org : elle renvoyait « en cours, 0-0 », sans minute ni buteurs. Ce n'était pas un bug de notre code : **l'offre gratuite donne des scores en différé**, et jamais le détail des buts.
+
+**La solution** : une 2e source pour le direct, l'API publique d'ESPN (gratuite, sans clé ; pas officielle, donc si elle ne répond pas, l'app garde les données de football-data). Elle donne le score à jour, la minute de jeu et chaque buteur avec sa minute.
+- Difficulté : les deux sources n'écrivent pas les noms pareil (« PAE AEK » / « AEK Athens », « Man City » / « Manchester City », « Barça » / « Barcelona »). Le code retrouve le même match grâce à l'heure du coup d'envoi et à la ressemblance des noms (10 nouveaux tests avec ces vrais cas).
+- Affichage : la minute (« 23' ») dans le badge rouge, « ⚽ A. Koita 12' » sous l'équipe sur l'accueil, le nom complet dans la fiche match.
+- La page se met à jour **toute seule** toutes les 30 secondes pendant un match (vérifié : la minute avance sans recharger).
+- Petit détail corrigé : sur téléphone le nom du buteur était coupé → nom court sur les cartes (« A. Koita »).
+
+**Résultat vérifié en direct** : AEK 1-0 Real Madrid, ⚽ Aboubakary Koita 12', minute qui avance toute seule.
+
+**Tests automatiques** : 72.
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

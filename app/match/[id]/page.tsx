@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import AnalysisCard, { AnalysisSkeleton } from "@/components/AnalysisCard";
+import AutoRefresh from "@/components/AutoRefresh";
 import FormRow from "@/components/FormRow";
 import HeadToHeadCard from "@/components/HeadToHeadCard";
 import MatchHeader from "@/components/MatchHeader";
@@ -14,7 +15,8 @@ import { getAnalysis } from "@/lib/ai";
 import { buildFacts, SUSPENSE_LABELS, type Analysis } from "@/lib/analysis";
 import { competitionLabel } from "@/lib/competitions";
 import { formatSpokenKickoff } from "@/lib/dates";
-import { getHeadToHead, getMatch, getScorers, getStandings, getTeamSeason } from "@/lib/football";
+import { getHeadToHead, getMatch, getScorers, getStandings, getTeamSeason, isToday } from "@/lib/football";
+import { isFinished, isLive } from "@/lib/match-status";
 import { getPlayerPhoto, type PlayerPhoto } from "@/lib/player-photo";
 import { playerToWatch } from "@/lib/players";
 import { probabilitiesFor } from "@/lib/probabilities";
@@ -45,6 +47,8 @@ async function MatchView({ params }: { params: Params }) {
 
   const match = await getMatch(id);
   if (!match) notFound();
+  // Pendant le match : mise à jour toutes les 30 s ; un match du jour pas encore commencé : toutes les minutes.
+  const refreshEvery = isLive(match.status) ? 30 : !isFinished(match.status) && (await isToday(match.utcDate)) ? 60 : null;
 
   // On lance les 4 chargements tout de suite, SANS les attendre ici :
   // chaque bloc s'affiche dès que ses propres données arrivent (s'il faut patienter
@@ -60,6 +64,7 @@ async function MatchView({ params }: { params: Params }) {
   return (
     <div className="flex flex-col gap-4">
       <MatchHeader match={match} />
+      {refreshEvery && <AutoRefresh seconds={refreshEvery} />}
 
       <Suspense fallback={<StoryPlaceholder />}>
         <StoryBlock match={match} analysis={analysis} featured={featured} homeSeason={homeSeason} awaySeason={awaySeason} />

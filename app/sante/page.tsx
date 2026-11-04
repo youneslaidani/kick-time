@@ -55,6 +55,18 @@ async function Checks() {
     }
   }
 
+  // Le direct (score, minute, buteurs) vient de l'API publique d'ESPN : on vérifie qu'elle répond.
+  try {
+    const response = await fetch("https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard", { cache: "no-store" });
+    checks.push({
+      label: "Direct ESPN",
+      ok: response.ok,
+      detail: response.ok ? "répond (scores, minutes et buteurs disponibles)" : `a répondu ${response.status} : l'app affichera les scores de football-data.org`,
+    });
+  } catch (error) {
+    checks.push({ label: "Direct ESPN", ok: false, detail: `injoignable (${(error as Error).message})` });
+  }
+
   return (
     <ul className="mt-6 flex flex-col gap-3">
       {checks.map((check) => (
