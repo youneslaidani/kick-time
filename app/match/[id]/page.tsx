@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import AnalysisCard, { AnalysisSkeleton } from "@/components/AnalysisCard";
 import FormRow from "@/components/FormRow";
 import HeadToHeadCard from "@/components/HeadToHeadCard";
 import MatchHeader from "@/components/MatchHeader";
 import Section, { Unavailable } from "@/components/Section";
 import StandingsCompare from "@/components/StandingsCompare";
+import { getAnalysis } from "@/lib/ai";
+import { buildFacts } from "@/lib/analysis";
 import { getHeadToHead, getMatch, getStandings, getTeamSeason } from "@/lib/football";
 import { headToHead, recentForm, venueRecord } from "@/lib/stats";
 import type { Match, StandingRow } from "@/lib/types";
@@ -46,7 +49,9 @@ async function MatchView({ params }: { params: Params }) {
     <div className="flex flex-col gap-4">
       <MatchHeader match={match} />
 
-      <AnalysisTeaser />
+      <Suspense fallback={<AnalysisSkeleton />}>
+        <AnalysisBlock match={match} homeSeason={homeSeason} awaySeason={awaySeason} pastMeetings={pastMeetings} table={table} />
+      </Suspense>
 
       <Section title="Forme du moment" hint="5 derniers matchs, du plus ancien au plus récent →">
         <Suspense fallback={<BlockSkeleton />}>
@@ -111,17 +116,28 @@ async function StandingsBlock({
   );
 }
 
-// Emplacement de l'analyse IA (branchée au jour 4).
-function AnalysisTeaser() {
-  return (
-    <section className="rounded-3xl border border-accent/40 bg-linear-to-br from-accent/15 via-surface to-surface p-5 sm:p-6">
-      <p className="text-sm font-bold uppercase tracking-widest text-accent">✦ Analyse IA</p>
-      <p className="mt-2 font-display text-2xl font-bold uppercase leading-tight">Les enjeux du match, expliqués simplement</p>
-      <p className="mt-1 text-sm text-muted">
-        Bientôt ici : l&apos;enjeu en une phrase, la forme des équipes, le face-à-face et le niveau de suspense.
-      </p>
-    </section>
-  );
+// L'analyse IA attend les mêmes données que les blocs du dessous, puis les fait expliquer par Gemini.
+async function AnalysisBlock({
+  match,
+  homeSeason,
+  awaySeason,
+  pastMeetings,
+  table,
+}: {
+  match: Match;
+  homeSeason: Loading<Match[]>;
+  awaySeason: Loading<Match[]>;
+  pastMeetings: Loading<Match[]>;
+  table: Loading<StandingRow[]>;
+}) {
+  const [home, away, meetings, rows] = await Promise.all([homeSeason, awaySeason, pastMeetings, table]);
+  // Sans aucun chiffre (mode démo, API en panne), l'IA n'aurait rien de vrai à raconter : on n'affiche rien.
+  if (!home && !away && !rows) return null;
+
+  const facts = buildFacts(match, { homeSeason: home, awaySeason: away, meetings, table: rows });
+  const analysis = await getAnalysis(facts);
+  const played = match.status !== "SCHEDULED" && match.status !== "TIMED";
+  return <AnalysisCard analysis={analysis} home={match.homeTeam} away={match.awayTeam} played={played} />;
 }
 
 function BlockSkeleton() {

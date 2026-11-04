@@ -102,6 +102,32 @@ Outils : **Claude Code** (l'IA qui m'aide à développer) et **Google Gemini** (
 
 ---
 
+## J1 (suite) — l'analyse IA (programme du jour 4)
+
+**Ce que j'ai demandé**
+- Brancher l'analyse IA sur la fiche match.
+
+**Ce que l'IA a fait**
+- `lib/analysis.ts` prépare les chiffres envoyés à Gemini : classement et « zone » (qualification, relégation…), forme datée du plus récent au plus ancien, bilan à domicile/extérieur, face-à-face. **9 nouveaux tests** (22 au total).
+- `lib/ai.ts` : les consignes (prompt), le format JSON imposé, 3 modèles essayés dans l'ordre, le cache de 12 h.
+- Une **analyse de secours écrite par le code** si Gemini est en panne (badge « Version simplifiée ») : le bloc n'est jamais vide.
+- La carte d'analyse : l'enjeu en une phrase, la jauge de suspense, la forme, le face-à-face, « À surveiller » et « Le mot du débutant ».
+
+**Vérifications**
+- Chaque affirmation de l'IA comparée aux vrais chiffres sur 3 matchs (Leipzig – Man City, Valence – Real Madrid, Feyenoord – Inter) : tout est juste, y compris « 0 but encaissé à domicile » pour Leipzig (19 marqués, 0 encaissé : vérifié).
+- Cache : 3 rechargements de la même fiche = 0 nouvel appel à Gemini (0,2 s chacun).
+- Panne simulée (nom de modèle inexistant) → l'analyse de secours s'affiche.
+
+**Problèmes rencontrés et solutions**
+- Vers 16 h, Gemini gratuit était saturé (erreur 503 sur 3 modèles) ou lent (20 s pour répondre « OK ») → ajout d'un modèle « lite » moins demandé, 35 s d'attente maximum par modèle, et l'analyse de secours.
+- **Triche involontaire repérée** : pour un match déjà joué, le classement actuel contient déjà son résultat. L'IA écrivait « Feyenoord, 30e et virtuel éliminé » en comptant la défaite 0-3 du match lui-même → on ne donne plus le classement à l'IA une fois le match commencé (+ un test).
+- « 2 victoire(s), 0 nul(s) » faisait brouillon → vrais accords (« 2 victoires, 0 nul »).
+
+**Ce que j'ai appris** *(à compléter par moi)*
+-
+
+---
+
 ## Modèle pour les jours suivants
 
 ## J? — date

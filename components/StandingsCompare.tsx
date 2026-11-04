@@ -1,4 +1,5 @@
 import type { VenueRecord } from "@/lib/stats";
+import { count } from "@/lib/text";
 import type { StandingRow, Team } from "@/lib/types";
 import { Unavailable } from "./Section";
 import TeamCrest from "./TeamCrest";
@@ -81,7 +82,7 @@ function VenueLine({ team, venue, record }: { team: Team; venue: string; record:
         {record.won} V · {record.drawn} N · {record.lost} D
         <span className="font-normal text-muted">
           {" "}
-          ({record.goalsFor} buts marqués, {record.goalsAgainst} encaissés)
+          ({count(record.goalsFor, "but")} marqué{record.goalsFor >= 2 ? "s" : ""}, {record.goalsAgainst} encaissé{record.goalsAgainst >= 2 ? "s" : ""})
         </span>
       </p>
     </div>

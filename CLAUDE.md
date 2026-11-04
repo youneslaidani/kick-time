@@ -33,6 +33,13 @@ Projet scolaire présenté en 10 minutes devant élèves et professeurs : la dé
 - JSON fiable avec `generationConfig.responseMimeType: "application/json"` + `responseSchema`.
 - `thinkingConfig.thinkingLevel: "low"` : ~6 s au lieu de ~11 s, mais une faute d'orthographe observée → à trancher au J4 (le cache rend la latence moins critique).
 
+## Analyse IA (fiche match)
+- `lib/analysis.ts` : `buildFacts` (chiffres envoyés à l'IA, testés), `parseAnalysis` (vérifie le JSON), `simpleAnalysis` (version sans IA si Gemini est en panne).
+- `lib/ai.ts` : prompt, schéma JSON, modèles essayés dans l'ordre (`gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-flash-latest`), 35 s max par modèle, cache partagé 12 h (clé = les chiffres).
+- Générée dans un composant serveur sous `Suspense` (pas de route API) : la clé reste côté serveur, le squelette « L'IA analyse le match… » s'affiche pendant la rédaction.
+- Le classement n'est donné à l'IA qu'avant le coup d'envoi (après, il contient déjà le résultat).
+- Gemini gratuit est lent aux heures chargées (15-25 s, 503 fréquents l'après-midi) → **préchauffer** les analyses de la démo.
+
 ## Règles du prompt IA
 - Français simple, pour quelqu'un qui découvre le foot.
 - Appeler les équipes **par leur nom** (sinon l'IA écrit « l'équipe à domicile »).

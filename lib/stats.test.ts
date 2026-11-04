@@ -1,29 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { formPoints, headToHead, recentForm, resultFor, venueRecord } from "./stats";
-import type { Match, MatchStatus } from "./types";
+import { match, team } from "./test-fixtures";
 
 // Tests automatiques : on vérifie les calculs sur de petits matchs inventés dont on connaît la réponse.
 // Lancer avec : npm test
 
-const team = (id: number, name: string) => ({ id, name, shortName: name, tla: name.slice(0, 3).toUpperCase(), crest: "" });
 const TOULOUSE = team(1, "Toulouse");
 const STRASBOURG = team(2, "Strasbourg");
 const NANTES = team(3, "Nantes");
-
-let nextId = 1;
-function match(date: string, home: typeof TOULOUSE, away: typeof TOULOUSE, h: number | null, a: number | null, status: MatchStatus = "FINISHED"): Match {
-  return {
-    id: nextId++,
-    utcDate: `${date}T20:00:00Z`,
-    status,
-    matchday: 1,
-    stage: "REGULAR_SEASON",
-    competition: { id: 1, name: "Ligue 1", code: "FL1", emblem: "" },
-    homeTeam: home,
-    awayTeam: away,
-    score: { winner: null, fullTime: { home: h, away: a }, halfTime: { home: null, away: null } },
-  };
-}
 
 describe("resultFor", () => {
   it("donne le résultat du point de vue de chaque équipe", () => {
